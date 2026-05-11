@@ -1,34 +1,37 @@
-# ⚽ Athletic Excellence System (SaaS MVP)
+# 🚂 Gerenciamento Trem das Onze (SaaS MVP)
 
-Este repositório contém o código-fonte do Minimum Viable Product (MVP) para o **Athletic Excellence System**, um sistema web (SaaS) projetado para a gestão de quadras e escolinhas de futebol.
+Sistema web (SaaS) para gestão de escolinhas de futebol e quadras esportivas.
 
-O sistema foca em simplificar o fluxo de inscrições (onboarding de alunos) e o controle financeiro (mensalidades), utilizando uma abordagem de validação "concierge" (Notificação via WhatsApp + Aprovação em Dashboard) para agilizar o lançamento sem depender de integrações bancárias complexas no primeiro momento.
-
----
-
-## 🚀 Tecnologias Utilizadas
-
-* **Backend / API:** [FastAPI](https://fastapi.tiangolo.com/) (Python)
-* **Frontend Público:** HTML, JS Vanilla e [Tailwind CSS](https://tailwindcss.com/) (Renderizado via Jinja2)
-* **Frontend Administrativo:** [Streamlit](https://streamlit.io/)
-* **Banco de Dados:** SQL Server
-* **ORM:** SQLAlchemy
+O sistema foca em simplificar o fluxo de inscrições (onboarding de alunos) e o controle financeiro (mensalidades), utilizando uma abordagem de validação "concierge" (Notificação via WhatsApp + Aprovação em Dashboard).
 
 ---
 
-## ⚙️ Funcionalidades Principais
+## 🚀 Stack Tecnológica
 
-### 📱 Para os Pais/Responsáveis (Mobile-First)
-* **Formulário de Inscrição Público:** Cadastro rápido de novos alunos e responsáveis sem necessidade de login.
-* **Portal do Responsável:** Visualização simplificada da mensalidade vigente.
-* **Pagamento Ágil:** Exibição de QR Code estático e chave PIX "Copia e Cola".
-* **Notificação 1-Click:** Botão que atualiza o status no sistema e redireciona automaticamente para o WhatsApp da secretaria com uma mensagem pré-formatada.
+| Camada | Tecnologia |
+|--------|-----------|
+| **Linguagem** | TypeScript (Full-Stack) |
+| **Backend / API** | Node.js + Express.js |
+| **ORM / Banco** | Prisma ORM (SQL Server) |
+| **Frontend** | React + Vite |
+| **Estilização** | Tailwind CSS |
+| **Ícones** | Lucide React |
+| **Gráficos** | Recharts |
 
-### 💻 Para a Gestão/Secretaria (Desktop)
-* **Dashboard de KPIs:** Visão em tempo real de receita esperada, inadimplência e leads.
-* **Gestão de Inscrições (Leads):** Aprovação com um clique de novos cadastros, transformando-os em alunos ativos e gerando a primeira cobrança automaticamente.
-* **Validação Financeira:** Fila de pagamentos com status "Aguardando Conferência" para cruzamento ágil com extrato bancário/WhatsApp.
-* **CRM de Alunos:** Listagem completa de cadastros, filtragem por categoria e status.
+---
+
+## ⚙️ Funcionalidades
+
+### 📱 Área Pública (Mobile-First)
+- **Formulário de Inscrição** — Cadastro de alunos e responsáveis sem login
+- **Portal do Responsável** — Acesso via CPF para ver mensalidades
+- **Notificação de Pagamento** — Botão que atualiza status + abre WhatsApp
+
+### 💻 Área Administrativa (Desktop)
+- **Dashboard de KPIs** — Receita, leads, pagamentos pendentes + gráficos
+- **Gestão de Leads** — Aprovação com um clique (gera primeira mensalidade)
+- **Validação Financeira** — Confirmar/rejeitar pagamentos
+- **CRM de Alunos** — Tabela com filtros por categoria e status
 
 ---
 
@@ -36,12 +39,71 @@ O sistema foca em simplificar o fluxo de inscrições (onboarding de alunos) e o
 
 ```text
 /
-├── main.py              # Aplicação FastAPI (Backend e Rotas Web)
-├── app.py               # Aplicação Streamlit (Dashboard da Gestão)
-├── models.py            # Modelos do banco de dados (SQLAlchemy)
-├── database.py          # Configuração de conexão com o SQL Server
-├── requirements.txt     # Dependências do projeto (Python)
-└── templates/           # Templates HTML renderizados pelo FastAPI
-    ├── base.html        
-    ├── inscricao.html   
-    └── portal.html
+├── backend/
+│   ├── prisma/schema.prisma
+│   ├── src/
+│   │   ├── controllers/
+│   │   │   ├── adminController.ts
+│   │   │   ├── inscricaoController.ts
+│   │   │   └── portalController.ts
+│   │   ├── routes/
+│   │   │   ├── adminRoutes.ts
+│   │   │   ├── inscricaoRoutes.ts
+│   │   │   └── portalRoutes.ts
+│   │   ├── prisma.ts
+│   │   └── server.ts
+│   ├── .env
+│   ├── package.json
+│   └── tsconfig.json
+└── frontend/
+    ├── src/
+    │   ├── components/
+    │   │   ├── AdminLayout.tsx
+    │   │   ├── PublicLayout.tsx
+    │   │   └── Sidebar.tsx
+    │   ├── pages/
+    │   │   ├── admin/
+    │   │   │   ├── CRM.tsx
+    │   │   │   ├── Dashboard.tsx
+    │   │   │   ├── Financeiro.tsx
+    │   │   │   └── Leads.tsx
+    │   │   └── public/
+    │   │       ├── Inscricao.tsx
+    │   │       └── Portal.tsx
+    │   ├── services/api.ts
+    │   ├── App.tsx
+    │   ├── main.tsx
+    │   └── index.css
+    ├── index.html
+    ├── package.json
+    ├── tailwind.config.js
+    ├── postcss.config.js
+    ├── vite.config.ts
+    └── tsconfig.json
+```
+
+---
+
+## 🏃 Como Rodar
+
+### Pré-requisitos
+- Node.js 18+
+- SQL Server (com database criada)
+
+### Backend
+```bash
+cd backend
+npm install
+npx prisma generate
+npx prisma db push
+npm run dev
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+O frontend roda em `http://localhost:5173` e faz proxy das chamadas `/api` para o backend na porta `3001`.
