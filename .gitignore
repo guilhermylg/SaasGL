@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database (SQLite dev)
+*.db
+*.db-journal
+
+# Prisma
+backend/prisma/migrations/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+frontend/dist/
+backend/dist/
+
+# Coverage
+coverage/
