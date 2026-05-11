@@ -1,4 +1,4 @@
-# 🚂 Gerenciamento Trem das Onze (SaaS MVP)
+# 🚂 Gerenciamento ESCOLINHA (SaaS MVP)
 
 Sistema web (SaaS) para gestão de escolinhas de futebol e quadras esportivas.
 
