@@ -1,10 +1,11 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
   DollarSign,
   UserPlus,
   Train,
+  LogOut,
 } from "lucide-react";
 
 const navItems = [
@@ -15,6 +16,13 @@ const navItems = [
 ];
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("trem_admin_token");
+    navigate("/admin/login");
+  };
+
   return (
     <aside className="w-64 fixed inset-y-0 left-0 bg-gradient-to-b from-navy to-navy-dark text-white flex flex-col z-20">
       {/* Logo */}
@@ -50,7 +58,14 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-white/10">
+      <div className="px-6 py-4 border-t border-white/10 space-y-4">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors w-full"
+        >
+          <LogOut size={16} />
+          Sair
+        </button>
         <p className="text-[10px] text-blue-400">v1.0.0 — MVP</p>
       </div>
     </aside>

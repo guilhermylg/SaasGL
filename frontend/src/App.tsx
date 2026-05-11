@@ -7,6 +7,15 @@ import Dashboard from "./pages/admin/Dashboard";
 import Financeiro from "./pages/admin/Financeiro";
 import Leads from "./pages/admin/Leads";
 import CRM from "./pages/admin/CRM";
+import Login from "./pages/admin/Login";
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem("trem_admin_token");
+  if (!token) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  return <>{children}</>;
+};
 
 export default function App() {
   return (
@@ -19,7 +28,15 @@ export default function App() {
       </Route>
 
       {/* Rotas Admin */}
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route path="/admin/login" element={<Login />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Dashboard />} />
         <Route path="leads" element={<Leads />} />
         <Route path="financeiro" element={<Financeiro />} />

@@ -112,11 +112,13 @@ export const efetivarMatricula = async (req: Request, res: Response) => {
     const mesRef = `${String(hoje.getMonth() + 1).padStart(2, "0")}/${hoje.getFullYear()}`;
     const vencimento = new Date(hoje.getFullYear(), hoje.getMonth(), 10);
 
+    const valorPadrao = parseFloat(process.env.VALOR_MENSALIDADE_PADRAO || "150.00");
+
     await prisma.mensalidade.create({
       data: {
         alunoId: id,
         mesReferencia: mesRef,
-        valor: 150.0,
+        valor: valorPadrao,
         dataVencimento: vencimento,
         status: "Pendente",
       },
@@ -244,3 +246,90 @@ export const getAlunos = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Erro interno." });
   }
 };
+
+export const updateAluno = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { nomeCompleto, categoria, informacoesMedicas, status } = req.body;
+
+    const aluno = await prisma.aluno.update({
+      where: { id },
+      data: {
+        nomeCompleto,
+        categoria,
+        informacoesMedicas,
+        status,
+      },
+    });
+
+    return res.json({ message: "Aluno atualizado com sucesso.", aluno });
+  } catch (error) {
+    console.error("Erro update aluno:", error);
+    return res.status(500).json({ error: "Erro interno." });
+  }
+};
+
+export const deleteAluno = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+
+    // Precisa deletar mensalidades primeiro (se não houver cascade)
+    await prisma.mensalidade.deleteMany({
+      where: { alunoId: id },
+    });
+
+    await prisma.aluno.delete({
+      where: { id },
+    });
+
+    return res.json({ message: "Aluno removido com sucesso." });
+  } catch (error) {
+    console.error("Erro delete aluno:", error);
+    return res.status(500).json({ error: "Erro interno." });
+  }
+};
+
+export const getHistoricoPagamentos = async (req: Request, res: Response) => {
+  try {
+    const alunoId = parseInt(req.params.id, 10);
+
+    const mensalidades = await prisma.mensalidade.findMany({
+      where: { alunoId },
+      orderBy: { dataVencimento: "desc" },
+    });
+
+    const result = mensalidades.map((m) => ({
+      ...m,
+      valor: Number(m.valor),
+    }));
+
+    return res.json(result);
+  } catch (error) {
+    console.error("Erro histórico:", error);
+    return res.status(500).json({ error: "Erro interno." });
+  }
+};
+
+export const exportarCRM = async (req: Request, res: Response) => {
+  try {
+    const alunos = await prisma.aluno.findMany({
+      include: { responsavel: true },
+    });
+
+    let csv = "ID,Nome do Aluno,Nascimento,Categoria,Status,Responsável,WhatsApp,CPF\n";
+    
+    for (const a of alunos) {
+      const dataNasc = new Date(a.dataNascimento).toLocaleDateString("pt-BR");
+      const resp = a.responsavel;
+      csv += `${a.id},"${a.nomeCompleto}",${dataNasc},${a.categoria || ""},${a.status},"${resp.nomeCompleto}",${resp.whatsapp},${resp.cpf}\n`;
+    }
+
+    res.header("Content-Type", "text/csv");
+    res.attachment("alunos_crm.csv");
+    return res.send(csv);
+  } catch (error) {
+    console.error("Erro exportar:", error);
+    return res.status(500).json({ error: "Erro interno." });
+  }
+};
+

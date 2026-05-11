@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Loader2, Users, Filter } from "lucide-react";
+import { Search, Loader2, Users, Filter, Download } from "lucide-react";
 import api from "../../services/api";
 
 interface AlunoRow {
@@ -56,9 +56,18 @@ export default function CRM() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-navy">CRM de Alunos</h1>
-        <p className="text-gray-500 text-sm mt-1">Gerencie todos os cadastros da escolinha.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-navy">CRM de Alunos</h1>
+          <p className="text-gray-500 text-sm mt-1">Gerencie todos os cadastros da escolinha.</p>
+        </div>
+        <button
+          onClick={() => window.open("http://localhost:3001/api/admin/export/alunos", "_blank")}
+          className="flex items-center gap-2 bg-navy text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-navy-light transition-colors shadow-sm"
+        >
+          <Download size={18} />
+          Exportar CSV
+        </button>
       </div>
 
       {/* Filtros */}

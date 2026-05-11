@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import prisma from "../prisma";
+import { inscricaoSchema } from "../validators/schemas";
 
 export const criarInscricao = async (req: Request, res: Response) => {
   try {
+    const data = inscricaoSchema.parse(req.body);
     const {
       nomeResponsavel,
       cpf,
@@ -11,7 +13,7 @@ export const criarInscricao = async (req: Request, res: Response) => {
       dataNascimento,
       categoria,
       informacoesMedicas,
-    } = req.body;
+    } = data;
 
     // Busca ou cria o responsável pelo CPF
     let responsavel = await prisma.responsavel.findUnique({
@@ -45,6 +47,10 @@ export const criarInscricao = async (req: Request, res: Response) => {
       alunoId: aluno.id,
     });
   } catch (error: any) {
+    if (error.name === "ZodError") {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
+
     console.error("Erro ao processar inscrição:", error);
 
     if (error.code === "P2002") {
