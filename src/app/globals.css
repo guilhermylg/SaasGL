@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+/* ==============================
+   StatPitch - Design System
+   Verde & Amarelo — Identidade Futebol
+   ============================== */
+
+@theme {
+  /* Background tones - dark com toque quente */
+  --color-pitch-bg: #0f1410;
+  --color-pitch-bg-alt: #141a16;
+  --color-pitch-surface: #1a221c;
+  --color-pitch-surface-hover: #212b24;
+  --color-pitch-border: #2a3a2e;
+  --color-pitch-border-hover: #3a5040;
+
+  /* Cores principais */
+  --color-verde: #22c55e;
+  --color-verde-light: #4ade80;
+  --color-verde-dark: #16a34a;
+  --color-amarelo: #eab308;
+  --color-amarelo-light: #facc15;
+  --color-amarelo-dark: #ca8a04;
+  --color-vermelho: #ef4444;
+  --color-vermelho-light: #f87171;
+
+  /* Texto */
+  --color-text-primary: #f0f4f1;
+  --color-text-secondary: #9ca89e;
+  --color-text-muted: #6b7c6e;
+
+  /* Fontes */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-pitch-bg);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-pitch-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-pitch-border-hover); }
+
+/* --- Cards --- */
+.card {
+  background: var(--color-pitch-surface);
+  border: 1px solid var(--color-pitch-border);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.card:hover {
+  background: var(--color-pitch-surface-hover);
+  border-color: var(--color-pitch-border-hover);
+}
+
+/* --- Inputs --- */
+.input-pitch {
+  background: var(--color-pitch-surface);
+  border: 1px solid var(--color-pitch-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-pitch:focus {
+  border-color: var(--color-verde);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+.input-pitch::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* --- Buttons --- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--color-verde);
+  color: #0a0f0b;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--color-verde-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid var(--color-pitch-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--color-pitch-surface);
+  border-color: var(--color-pitch-border-hover);
+}
+
+/* --- Score Input --- */
+.score-input {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 24px;
+  text-align: center;
+  width: 56px;
+  height: 56px;
+  background: var(--color-pitch-surface);
+  border: 1px solid var(--color-pitch-border);
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.score-input:focus {
+  border-color: var(--color-verde);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+/* --- Dividers --- */
+.divider {
+  height: 1px;
+  background: var(--color-pitch-border);
+}
+
+.divider-gradient {
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-verde), var(--color-amarelo));
+  border-radius: 1px;
+}
+
+/* --- Badge --- */
+.badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-vermelho-light);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
