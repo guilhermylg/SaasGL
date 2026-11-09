@@ -1,288 +1,181 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Trophy,
   Users,
-  BarChart3,
-  Shield,
+  CalendarClock,
+  CreditCard,
+  Smartphone,
   ChevronRight,
-  Zap,
-  Globe,
-  Target,
+  CheckCircle2,
+  ShieldCheck,
+  GraduationCap,
 } from "lucide-react";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.08, duration: 0.5, ease: "easeOut" as const },
-  }),
-};
 
 const features = [
   {
-    icon: Trophy,
-    title: "Crie sua Liga",
+    icon: Smartphone,
+    title: "Matrícula Digital sem Login",
     description:
-      "Monte seu bolão em segundos. Defina valor de entrada e chave PIX do organizador.",
+      "Envie o link /matricula no WhatsApp dos pais. Cadastro completo do atleta, ficha médica, sugestão automática de turma Sub e checkout Stripe.",
   },
   {
-    icon: Users,
-    title: "Convide a Galera",
+    icon: CalendarClock,
+    title: "Grade Híbrida sem Conflito",
     description:
-      "Manda o link no grupo e junta os amigos. Cada um faz o PIX direto pro organizador.",
+      "Os horários das turmas da escolinha bloqueiam automaticamente a agenda de locação da quadra, impedindo reservas duplicadas.",
   },
   {
-    icon: BarChart3,
-    title: "Ranking Automático",
+    icon: CreditCard,
+    title: "Mensalidades + Stripe Webhook",
     description:
-      "Acabou o jogo, a pontuação atualiza sozinha. Sem planilha, sem discussão.",
+      "Matriz anual e calendário por vencimento (dias 5, 10, 15, 20) com geração de link de pagamento e baixa automática via Webhook.",
   },
   {
-    icon: Shield,
-    title: "Custódia Zero",
+    icon: GraduationCap,
+    title: "Gestão Técnica por Categoria",
     description:
-      "A gente não toca no dinheiro. Só organiza o bolão. Pagamento é entre vocês.",
+      "Controle seus atletas por categoria (Sub-7 ao Sub-17), posição em campo, pé dominante, observações médicas e contato direto com os pais.",
   },
-];
-
-const stats = [
-  { value: "2026", label: "Copa do Mundo", icon: Globe },
-  { value: "48", label: "Seleções", icon: Target },
-  { value: "104", label: "Partidas", icon: Zap },
 ];
 
 export default function Home() {
   return (
-    <main className="relative overflow-hidden">
-      {/* Subtle field texture */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-30"
-        style={{
-          backgroundImage: `radial-gradient(circle at 50% 0%, rgba(34,197,94,0.06) 0%, transparent 60%)`,
-        }}
-      />
-
-      {/* ===== HERO ===== */}
-      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          className="relative z-10 max-w-3xl"
-        >
-          {/* Status badge */}
-          <motion.div
-            custom={0}
-            variants={fadeUp}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-pitch-border bg-pitch-surface px-4 py-2 text-sm"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-verde opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-verde" />
+    <main className="relative min-h-screen overflow-hidden bg-pitch-bg">
+      {/* Navbar */}
+      <header className="relative z-10 border-b border-pitch-border bg-pitch-bg-alt/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-verde/15 font-mono text-sm font-bold text-verde">
+              SP
+            </div>
+            <span className="text-xl font-extrabold tracking-tight">
+              Stat<span className="text-verde">Pitch</span>
             </span>
-            <span className="text-text-secondary">
-              Inscrições abertas — Copa 2026
-            </span>
-          </motion.div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/matricula"
+              className="btn-secondary px-4 py-2 text-xs sm:text-sm"
+            >
+              Link de Matrícula (/matricula)
+            </Link>
+            <Link
+              href="/dashboard"
+              className="btn-primary px-4 py-2 text-xs sm:text-sm"
+            >
+              Acessar Painel
+            </Link>
+          </div>
+        </div>
+      </header>
 
-          {/* Logo */}
-          <motion.h1
-            custom={1}
-            variants={fadeUp}
-            className="mb-5 text-5xl font-extrabold tracking-tight sm:text-7xl"
-          >
-            Stat
-            <span className="text-verde">Pitch</span>
-          </motion.h1>
-
-          {/* Gradient bar under title */}
-          <motion.div
-            custom={2}
-            variants={fadeUp}
-            className="divider-gradient mx-auto mb-8 w-24"
-          />
-
-          <motion.p
-            custom={2}
-            variants={fadeUp}
-            className="mx-auto mb-3 max-w-xl text-lg text-text-secondary leading-relaxed"
-          >
-            O bolão da{" "}
-            <span className="font-semibold text-amarelo">Copa do Mundo 2026</span>{" "}
-            que funciona de verdade. Cria a liga, chama os amigos, e deixa a
-            pontuação com a gente.
-          </motion.p>
-
-          <motion.p
-            custom={3}
-            variants={fadeUp}
-            className="mx-auto mb-10 text-sm text-text-muted"
-          >
-            Modelo Custódia Zero — a gente organiza, o dinheiro é entre vocês.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            custom={4}
-            variants={fadeUp}
-            className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center"
-          >
-            <button className="btn-primary px-8 py-3 text-base">
-              Criar minha Liga
-              <ChevronRight size={18} />
-            </button>
-            <button className="btn-secondary px-8 py-3">
-              Entrar em uma Liga
-            </button>
-          </motion.div>
-        </motion.div>
-
-        {/* Stats bar */}
+      {/* Hero Section */}
+      <section className="relative z-10 mx-auto max-w-5xl px-6 pt-20 pb-16 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2"
+          transition={{ duration: 0.45 }}
         >
-          <div className="card flex items-center gap-8 px-8 py-4 sm:gap-12">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex items-center gap-3">
-                <stat.icon size={18} className="text-text-muted" />
-                <div>
-                  <div className="font-mono text-lg font-bold text-verde">
-                    {stat.value}
-                  </div>
-                  <div className="text-xs text-text-muted">{stat.label}</div>
-                </div>
-              </div>
-            ))}
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-pitch-border bg-pitch-surface px-4 py-1.5 text-xs font-medium text-text-secondary">
+            <ShieldCheck size={14} className="text-verde" />
+            <span>SaaS Híbrido · Escolinha de Futebol & Locação de Quadras</span>
+          </div>
+
+          <h1 className="mx-auto mb-6 max-w-3xl text-4xl font-extrabold tracking-tight sm:text-6xl">
+            Sua Escolinha e Sua Quadra em uma{" "}
+            <span className="text-verde">Única Agenda e Caixa</span>
+          </h1>
+
+          <div className="divider-gradient mx-auto mb-6 w-24" />
+
+          <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-text-secondary sm:text-lg">
+            Elimine fichas de papel e conflitos de horários. Matricule alunos via
+            link no WhatsApp com triagem automática por idade (<span className="text-amarelo font-semibold">Sub-7 a Sub-17</span>),
+            bloqueie horários de treino na quadra e receba via{" "}
+            <span className="text-verde font-semibold">Stripe</span>.
+          </p>
+
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/dashboard"
+              className="btn-primary w-full px-8 py-3.5 text-base sm:w-auto"
+            >
+              Entrar no Painel de Gestão
+              <ChevronRight size={18} />
+            </Link>
+            <Link
+              href="/matricula"
+              className="btn-secondary w-full px-8 py-3.5 text-base sm:w-auto"
+            >
+              Testar Matrícula Digital dos Pais
+            </Link>
           </div>
         </motion.div>
-      </section>
 
-      {/* ===== COMO FUNCIONA ===== */}
-      <section className="relative z-10 px-6 pb-28">
-        <div className="mx-auto max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12 text-center"
-          >
-            <h2 className="mb-3 text-3xl font-bold">Como funciona</h2>
-            <div className="divider-gradient mx-auto w-16" />
-          </motion.div>
-
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature, i) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.4 }}
-                className="card group p-6"
-              >
-                <div className="mb-4 inline-flex rounded-lg bg-verde/10 p-3 text-verde transition-transform group-hover:scale-110">
-                  <feature.icon size={22} />
-                </div>
-                <h3 className="mb-2 text-base font-semibold text-text-primary">
-                  {feature.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-text-secondary">
-                  {feature.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
+        {/* Quick module pills */}
+        <div className="mt-14 grid gap-3 sm:grid-cols-4">
+          {[
+            { label: "Alunos & Fichas Médicas", href: "/dashboard/students", icon: Users },
+            { label: "Turmas & Categorias Sub", href: "/dashboard/classes", icon: GraduationCap },
+            { label: "Calendário Mensalidades", href: "/dashboard/payments", icon: CreditCard },
+            { label: "Grade Híbrida da Quadra", href: "/dashboard/court", icon: CalendarClock },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="card flex items-center justify-center gap-2.5 px-4 py-3.5 text-xs font-semibold text-text-primary hover:border-verde"
+            >
+              <item.icon size={16} className="text-verde" />
+              <span>{item.label}</span>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* ===== PONTUAÇÃO ===== */}
-      <section className="relative z-10 px-6 pb-28">
-        <div className="mx-auto max-w-2xl">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12 text-center"
-          >
-            <h2 className="mb-3 text-3xl font-bold">Pontuação</h2>
-            <div className="divider-gradient mx-auto w-16" />
-          </motion.div>
-
-          <div className="card overflow-hidden divide-y divide-pitch-border">
-            {[
-              {
-                pts: "5",
-                label: "Placar Exato",
-                desc: "Cravou o resultado certinho",
-                color: "text-verde",
-                bg: "bg-verde/10",
-              },
-              {
-                pts: "3",
-                label: "Vencedor + Saldo",
-                desc: "Acertou quem ganhou e a diferença de gols",
-                color: "text-amarelo",
-                bg: "bg-amarelo/10",
-              },
-              {
-                pts: "1",
-                label: "Só o Vencedor",
-                desc: "Acertou quem venceu (ou que empatou)",
-                color: "text-text-secondary",
-                bg: "bg-pitch-surface-hover",
-              },
-              {
-                pts: "0",
-                label: "Errou",
-                desc: "Não foi dessa vez",
-                color: "text-vermelho",
-                bg: "bg-vermelho/10",
-              },
-            ].map((rule, i) => (
-              <motion.div
-                key={rule.pts}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.3 }}
-                className="flex items-center gap-5 px-6 py-4"
-              >
-                <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg font-mono text-lg font-bold ${rule.color} ${rule.bg}`}
-                >
-                  {rule.pts}
-                </div>
-                <div>
-                  <div className="font-semibold text-text-primary text-sm">
-                    {rule.label}
-                  </div>
-                  <div className="text-xs text-text-muted">{rule.desc}</div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+      {/* Features */}
+      <section className="relative z-10 mx-auto max-w-6xl px-6 py-16">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map((feature, idx) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.07, duration: 0.35 }}
+              className="card p-6"
+            >
+              <div className="mb-4 inline-flex rounded-lg bg-verde/10 p-3 text-verde">
+                <feature.icon size={22} />
+              </div>
+              <h2 className="mb-2 text-base font-bold text-text-primary">
+                {feature.title}
+              </h2>
+              <p className="text-sm leading-relaxed text-text-secondary">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
         </div>
       </section>
 
-      {/* ===== FOOTER ===== */}
-      <footer className="relative z-10 border-t border-pitch-border px-6 py-8">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
+      {/* Footer */}
+      <footer className="border-t border-pitch-border px-6 py-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">
+            <span className="font-bold">
               Stat<span className="text-verde">Pitch</span>
             </span>
             <span className="rounded bg-pitch-surface px-2 py-0.5 font-mono text-[10px] text-text-muted">
-              MVP
+              MVP SaaS · Supabase + Stripe
             </span>
           </div>
-          <p className="text-xs text-text-muted">
-            © 2026 StatPitch · Custódia Zero
-          </p>
+          <div className="flex items-center gap-4 text-xs text-text-muted">
+            <span className="inline-flex items-center gap-1">
+              <CheckCircle2 size={13} className="text-verde" /> Pronto para Vercel
+            </span>
+          </div>
         </div>
       </footer>
     </main>
