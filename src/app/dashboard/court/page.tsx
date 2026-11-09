@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   CalendarClock,
   Plus,
-  GraduationCap,
+  Trophy,
   CheckCircle2,
   Clock,
   MessageCircle,
@@ -121,7 +121,6 @@ export default function CourtSchedulePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Dias da semana da data selecionada (Seg a Dom)
   const weekDays = useMemo(() => {
     const [y, m, d] = selectedDate.split("-").map(Number);
     const baseDate = new Date(y, m - 1, d);
@@ -141,7 +140,6 @@ export default function CourtSchedulePage() {
     });
   }, [selectedDate]);
 
-  // Verifica se um slot (dateISO, hour) está ocupado por Turma da Escolinha
   const getClassForSlot = (
     dateIso: string,
     hour: number
@@ -161,7 +159,6 @@ export default function CourtSchedulePage() {
     return null;
   };
 
-  // Verifica se um slot (dateISO, hour) está ocupado por Locação Externa Ativa
   const getBookingForSlot = (
     dateIso: string,
     hour: number
@@ -193,7 +190,6 @@ export default function CourtSchedulePage() {
     setBookingModal({ date: dateIso, startTime, endTime });
   };
 
-  // Validação de conflito (Escolinha + Locações Ativas) e criação
   const handleCreateBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bookingModal) return;
@@ -209,12 +205,12 @@ export default function CourtSchedulePage() {
       return;
     }
 
-    // Verifica conflito em todas as horas do intervalo
+    // Verifica conflito em cada hora
     for (let h = startH; h < endH; h++) {
       const conflictingClass = getClassForSlot(bookingModal.date, h);
       if (conflictingClass) {
         setConflictError(
-          `Conflito de horário: A turma "${conflictingClass.name}" treina neste horário (${formatTimeShort(conflictingClass.start_time)} às ${formatTimeShort(conflictingClass.end_time)}).`
+          `Conflito: A turma "${conflictingClass.name}" tem treino agendado neste horário (${formatTimeShort(conflictingClass.start_time)} às ${formatTimeShort(conflictingClass.end_time)}).`
         );
         return;
       }
@@ -222,7 +218,7 @@ export default function CourtSchedulePage() {
       const conflictingBooking = getBookingForSlot(bookingModal.date, h);
       if (conflictingBooking) {
         setConflictError(
-          `Conflito de horário: Já existe uma reserva ativa para "${conflictingBooking.client_name}" das ${formatTimeShort(conflictingBooking.start_time)} às ${formatTimeShort(conflictingBooking.end_time)}.`
+          `Conflito: Já existe reserva para "${conflictingBooking.client_name}" das ${formatTimeShort(conflictingBooking.start_time)} às ${formatTimeShort(conflictingBooking.end_time)}.`
         );
         return;
       }
@@ -266,7 +262,7 @@ export default function CourtSchedulePage() {
       await loadAll();
     } catch (err) {
       setConflictError(
-        err instanceof Error ? err.message : "Erro ao criar reserva."
+        err instanceof Error ? err.message : "Erro ao registrar reserva."
       );
     } finally {
       setSavingBooking(false);
@@ -297,7 +293,7 @@ export default function CourtSchedulePage() {
       if (checkoutUrl) {
         const waPhone = formatPhoneWhatsApp(booking.client_phone);
         const msg = encodeURIComponent(
-          `Olá ${booking.client_name}! Sua reserva da quadra para ${booking.booking_date.split("-").reverse().join("/")} (${formatTimeShort(booking.start_time)} às ${formatTimeShort(booking.end_time)}) está pré-agendada. Valor: ${formatCurrencyBRL(booking.price_cents)}.\n\nGaranta o horário pagando pelo link Stripe:\n${checkoutUrl}`
+          `Olá ${booking.client_name}! Sua reserva da quadra para ${booking.booking_date.split("-").reverse().join("/")} (${formatTimeShort(booking.start_time)} às ${formatTimeShort(booking.end_time)}) está pré-agendada no valor de ${formatCurrencyBRL(booking.price_cents)}.\n\nGaranta sua vaga pagando pelo link Stripe:\n${checkoutUrl}`
         );
         window.open(`https://wa.me/${waPhone}?text=${msg}`, "_blank");
       }
@@ -344,23 +340,23 @@ export default function CourtSchedulePage() {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-2xl font-extrabold text-text-primary flex items-center gap-2.5">
-            <CalendarClock size={24} className="text-verde" />
-            Grade Híbrida de Ocupação da Quadra (07:00 às 23:00)
+          <h1 className="font-[family-name:var(--font-montserrat)] text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
+            <CalendarClock size={24} className="text-emerald-600" />
+            Agenda da Quadra (Grade Híbrida 07:00 às 23:00)
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Turmas da escolinha bloqueiam automaticamente a agenda, impedindo{" "}
-            <em>double booking</em> com locações avulsas ou mensalistas.
+          <p className="mt-1 text-sm text-slate-600">
+            As turmas fixas da escolinha bloqueiam a agenda automaticamente,
+            eliminando o risco de <em>double booking</em> com aluguéis avulsos.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Navegação de Data */}
-          <div className="flex items-center gap-1 rounded-xl border border-pitch-border bg-pitch-surface p-1">
+          {/* Seletor de Data */}
+          <div className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white p-1 shadow-2xs">
             <button
               type="button"
               onClick={() => shiftDays(viewMode === "weekly" ? -7 : -1)}
-              className="rounded-lg p-1.5 text-text-secondary hover:bg-pitch-surface-hover hover:text-text-primary cursor-pointer"
+              className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
             >
               <ChevronLeft size={16} />
             </button>
@@ -368,40 +364,40 @@ export default function CourtSchedulePage() {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent px-2 text-xs font-mono font-bold text-text-primary outline-none"
+              className="bg-transparent px-2 text-xs font-mono font-bold text-slate-800 outline-none"
             />
             <button
               type="button"
               onClick={() => shiftDays(viewMode === "weekly" ? 7 : 1)}
-              className="rounded-lg p-1.5 text-text-secondary hover:bg-pitch-surface-hover hover:text-text-primary cursor-pointer"
+              className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 cursor-pointer"
             >
               <ChevronRight size={16} />
             </button>
           </div>
 
-          {/* Alternar Semanal / Diária */}
-          <div className="inline-flex rounded-xl border border-pitch-border bg-pitch-surface p-1">
+          {/* Toggle Semanal / Diária */}
+          <div className="inline-flex rounded-lg border border-slate-300 bg-white p-1 shadow-2xs">
             <button
               type="button"
               onClick={() => setViewMode("weekly")}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              className={`rounded px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
                 viewMode === "weekly"
-                  ? "bg-verde text-[#0a0f0b]"
-                  : "text-text-secondary"
+                  ? "bg-emerald-600 text-white shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Grade Semanal
+              Semanal
             </button>
             <button
               type="button"
               onClick={() => setViewMode("daily")}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+              className={`rounded px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
                 viewMode === "daily"
-                  ? "bg-verde text-[#0a0f0b]"
-                  : "text-text-secondary"
+                  ? "bg-emerald-600 text-white shadow-2xs"
+                  : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Visão Diária
+              Diária
             </button>
           </div>
 
@@ -410,48 +406,48 @@ export default function CourtSchedulePage() {
             onClick={() =>
               openNewBookingModal(selectedDate, "20:00", "21:00")
             }
-            className="btn-primary px-4 py-2 text-xs"
+            className="btn-primary !text-xs"
           >
             <Plus size={15} />
-            + Reservar Horário
+            <span>+ Reservar Horário</span>
           </button>
         </div>
       </div>
 
-      {/* Legenda da Grade Híbrida */}
-      <div className="card p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="inline-flex items-center gap-2 font-semibold text-sky-400">
-            <span className="h-3 w-3 rounded bg-sky-500/30 border border-sky-400" />
-            Treino Fixo da Escolinha (Bloqueado)
+      {/* Legenda dos Slots com cores semânticas */}
+      <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-5">
+          <span className="inline-flex items-center gap-2 font-semibold text-indigo-800">
+            <span className="h-3.5 w-3.5 rounded border border-indigo-300 court-locked-stripe" />
+            Turma da Escolinha (Bloqueio Fixo)
           </span>
-          <span className="inline-flex items-center gap-2 font-semibold text-verde">
-            <span className="h-3 w-3 rounded bg-verde/30 border border-verde" />
+          <span className="inline-flex items-center gap-2 font-semibold text-emerald-800">
+            <span className="h-3.5 w-3.5 rounded bg-emerald-100 border border-emerald-300" />
             Aluguel Confirmado (Pago)
           </span>
-          <span className="inline-flex items-center gap-2 font-semibold text-amarelo-light">
-            <span className="h-3 w-3 rounded bg-amarelo/30 border border-amarelo" />
+          <span className="inline-flex items-center gap-2 font-semibold text-amber-800">
+            <span className="h-3.5 w-3.5 rounded bg-amber-100 border border-amber-300" />
             Aluguel Pendente (Aguardando Stripe)
           </span>
-          <span className="inline-flex items-center gap-2 text-text-muted">
-            <span className="h-3 w-3 rounded border border-pitch-border bg-pitch-bg-alt" />
+          <span className="inline-flex items-center gap-2 font-medium text-slate-500">
+            <span className="h-3.5 w-3.5 rounded border border-dashed border-slate-300 bg-slate-50" />
             Horário Livre (+ Reservar)
           </span>
         </div>
       </div>
 
-      {/* Tabela da Grade 07:00 às 23:00 */}
+      {/* Grade de Horários 07:00 às 23:00 */}
       {loading ? (
-        <div className="card p-12 text-center text-sm text-text-muted">
-          Carregando grade de ocupação da quadra...
+        <div className="card p-12 text-center text-sm text-slate-500">
+          Carregando grade da quadra...
         </div>
       ) : (
-        <div className="card overflow-hidden">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-pitch-border bg-pitch-bg-alt">
-                  <th className="sticky left-0 z-10 w-28 bg-pitch-bg-alt px-3 py-3 font-mono font-bold text-text-muted">
+                <tr className="border-b border-slate-200 bg-slate-100 text-slate-700 font-mono">
+                  <th className="sticky left-0 z-10 w-28 bg-slate-100 px-3 py-3 font-bold border-r border-slate-200">
                     Horário
                   </th>
                   {displayedDays.map((d) => {
@@ -459,18 +455,14 @@ export default function CourtSchedulePage() {
                     return (
                       <th
                         key={d.iso}
-                        className={`min-w-[155px] px-3 py-3 text-center ${
-                          isToday ? "bg-verde/10" : ""
+                        className={`min-w-[160px] px-3 py-2.5 text-center border-r border-slate-200 ${
+                          isToday ? "bg-emerald-50 text-emerald-800 font-bold" : ""
                         }`}
                       >
-                        <div
-                          className={`font-bold ${
-                            isToday ? "text-verde" : "text-text-primary"
-                          }`}
-                        >
+                        <div className="font-[family-name:var(--font-montserrat)] font-bold">
                           {d.dayName}
                         </div>
-                        <div className="font-mono text-[11px] text-text-muted">
+                        <div className="text-[11px] text-slate-500 font-mono">
                           {d.shortDate}
                         </div>
                       </th>
@@ -478,38 +470,38 @@ export default function CourtSchedulePage() {
                   })}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-pitch-border">
+              <tbody className="divide-y divide-slate-100">
                 {COURT_HOURS.map((slot) => (
-                  <tr key={slot.hour} className="hover:bg-pitch-surface/40">
+                  <tr key={slot.hour} className="hover:bg-slate-50/50">
                     {/* Coluna de Horário */}
-                    <td className="sticky left-0 z-10 bg-pitch-surface px-3 py-2.5 font-mono text-xs font-bold text-text-secondary border-r border-pitch-border">
+                    <td className="sticky left-0 z-10 bg-slate-50 px-3 py-2.5 font-mono text-xs font-bold text-slate-700 border-r border-slate-200">
                       {slot.label}
                     </td>
 
-                    {/* Células por Dia */}
+                    {/* Slots por dia */}
                     {displayedDays.map((day) => {
                       const schoolClass = getClassForSlot(day.iso, slot.hour);
                       const booking = getBookingForSlot(day.iso, slot.hour);
 
-                      // 1. Bloqueado por Turma da Escolinha (Azul/Roxo)
+                      // 1. Bloqueado por Turma da Escolinha (Hachurado Indigo)
                       if (schoolClass) {
                         return (
                           <td
                             key={day.iso}
-                            className="p-1.5 align-top border-r border-pitch-border/50"
+                            className="p-1.5 align-top border-r border-slate-200"
                           >
-                            <div className="h-full rounded-lg border border-sky-500/40 bg-sky-500/15 p-2.5 text-sky-200">
+                            <div className="h-full rounded-lg border border-indigo-200 court-locked-stripe p-2.5 text-indigo-900 shadow-2xs">
                               <div className="flex items-center justify-between gap-1">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-sky-400">
-                                  <GraduationCap size={12} />
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-700">
+                                  <Trophy size={11} />
                                   Escolinha
                                 </span>
-                                <Lock size={11} className="text-sky-400" />
+                                <Lock size={11} className="text-indigo-600" />
                               </div>
-                              <div className="mt-1 font-bold text-xs text-white truncate">
+                              <div className="mt-1 font-[family-name:var(--font-montserrat)] font-bold text-xs text-indigo-950 truncate">
                                 {schoolClass.name}
                               </div>
-                              <div className="text-[10px] text-sky-300/90 truncate">
+                              <div className="text-[10px] text-indigo-700 truncate font-medium">
                                 {schoolClass.coach_name}
                               </div>
                             </div>
@@ -517,29 +509,29 @@ export default function CourtSchedulePage() {
                         );
                       }
 
-                      // 2. Ocupado por Aluguel de Cliente Externo (Verde se pago, Amarelo se pendente)
+                      // 2. Aluguel Externo (Verde se pago, Amarelo se pendente)
                       if (booking) {
                         const isPaid = booking.payment_status === "paid";
                         return (
                           <td
                             key={day.iso}
-                            className="p-1.5 align-top border-r border-pitch-border/50"
+                            className="p-1.5 align-top border-r border-slate-200"
                           >
                             <button
                               type="button"
                               onClick={() => setSelectedBooking(booking)}
-                              className={`w-full text-left rounded-lg border p-2.5 transition cursor-pointer ${
+                              className={`w-full text-left rounded-lg border p-2.5 transition cursor-pointer shadow-2xs ${
                                 isPaid
-                                  ? "border-verde/40 bg-verde/15 hover:bg-verde/25"
-                                  : "border-amarelo/40 bg-amarelo/15 hover:bg-amarelo/25"
+                                  ? "border-emerald-300 bg-emerald-100/80 hover:bg-emerald-200 text-emerald-900"
+                                  : "border-amber-300 bg-amber-100/80 hover:bg-amber-200 text-amber-900"
                               }`}
                             >
                               <div className="flex items-center justify-between gap-1">
                                 <span
-                                  className={`text-[10px] font-bold uppercase ${
+                                  className={`text-[10px] font-bold uppercase tracking-wider ${
                                     isPaid
-                                      ? "text-verde"
-                                      : "text-amarelo-light"
+                                      ? "text-emerald-800"
+                                      : "text-amber-800"
                                   }`}
                                 >
                                   {booking.booking_type}
@@ -547,19 +539,19 @@ export default function CourtSchedulePage() {
                                 {isPaid ? (
                                   <CheckCircle2
                                     size={12}
-                                    className="text-verde"
+                                    className="text-emerald-700"
                                   />
                                 ) : (
                                   <Clock
                                     size={12}
-                                    className="text-amarelo-light"
+                                    className="text-amber-700"
                                   />
                                 )}
                               </div>
-                              <div className="mt-1 font-bold text-xs text-text-primary truncate">
+                              <div className="mt-1 font-[family-name:var(--font-montserrat)] font-bold text-xs truncate">
                                 {booking.client_name}
                               </div>
-                              <div className="mt-0.5 font-mono text-[11px] font-semibold text-text-secondary">
+                              <div className="mt-0.5 font-mono text-[11px] font-bold">
                                 {formatCurrencyBRL(booking.price_cents)}
                               </div>
                             </button>
@@ -567,11 +559,11 @@ export default function CourtSchedulePage() {
                         );
                       }
 
-                      // 3. Horário Livre (+ Reservar Horário)
+                      // 3. Horário Livre
                       return (
                         <td
                           key={day.iso}
-                          className="p-1.5 align-middle border-r border-pitch-border/50"
+                          className="p-1.5 align-middle border-r border-slate-200"
                         >
                           <button
                             type="button"
@@ -582,10 +574,10 @@ export default function CourtSchedulePage() {
                                 slot.endTime
                               )
                             }
-                            className="group flex h-16 w-full items-center justify-center rounded-lg border border-dashed border-pitch-border/70 bg-pitch-bg-alt/40 text-[11px] font-medium text-text-muted transition hover:border-verde hover:bg-verde/10 hover:text-verde cursor-pointer"
+                            className="group flex h-16 w-full items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50/50 text-[11px] font-semibold text-slate-400 transition hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer"
                           >
-                            <span className="opacity-60 group-hover:opacity-100 group-hover:font-bold">
-                              + Reservar Horário
+                            <span className="opacity-75 group-hover:opacity-100">
+                              + Reservar
                             </span>
                           </button>
                         </td>
@@ -599,31 +591,31 @@ export default function CourtSchedulePage() {
         </div>
       )}
 
-      {/* Modal: Nova Reserva de Horário */}
+      {/* Modal Nova Reserva */}
       {bookingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-          <div className="card w-full max-w-lg p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-pitch-border pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <span className="text-xs font-bold uppercase text-verde">
+                <span className="font-mono text-xs font-bold uppercase text-emerald-600">
                   Nova Locação de Quadra
                 </span>
-                <h2 className="text-lg font-bold text-text-primary">
-                  Reservar Horário ({bookingModal.date.split("-").reverse().join("/")})
+                <h2 className="font-[family-name:var(--font-montserrat)] text-lg font-bold text-slate-900">
+                  Reservar ({bookingModal.date.split("-").reverse().join("/")})
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => setBookingModal(null)}
-                className="rounded-lg p-1 text-text-muted hover:text-text-primary cursor-pointer"
+                className="rounded-lg p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
             {conflictError && (
-              <div className="flex items-start gap-2 rounded-xl border border-vermelho/40 bg-vermelho/15 p-3.5 text-xs text-vermelho-light">
-                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-800 font-medium">
+                <AlertCircle size={16} className="shrink-0 mt-0.5 text-rose-600" />
                 <span>{conflictError}</span>
               </div>
             )}
@@ -631,7 +623,7 @@ export default function CourtSchedulePage() {
             <form onSubmit={handleCreateBooking} className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Data *
                   </label>
                   <input
@@ -641,11 +633,11 @@ export default function CourtSchedulePage() {
                     onChange={(e) =>
                       setBookingModal({ ...bookingModal, date: e.target.value })
                     }
-                    className="input-pitch w-full text-xs font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-mono text-slate-900 outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Início *
                   </label>
                   <select
@@ -660,7 +652,7 @@ export default function CourtSchedulePage() {
                         endTime: nextEnd,
                       });
                     }}
-                    className="input-pitch w-full text-xs font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-2 text-xs font-mono text-slate-900 outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     {COURT_HOURS.map((h) => (
                       <option key={h.startTime} value={h.startTime}>
@@ -670,7 +662,7 @@ export default function CourtSchedulePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Término *
                   </label>
                   <select
@@ -681,7 +673,7 @@ export default function CourtSchedulePage() {
                         endTime: e.target.value,
                       })
                     }
-                    className="input-pitch w-full text-xs font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-2 text-xs font-mono text-slate-900 outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     {COURT_HOURS.map((h) => (
                       <option key={h.endTime} value={h.endTime}>
@@ -693,21 +685,21 @@ export default function CourtSchedulePage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2 sm:col-span-1">
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
-                    Nome do Cliente / Responsável *
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
+                    Nome do Cliente *
                   </label>
                   <input
                     type="text"
                     required
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
-                    placeholder="Ex: Diego Souza & Amigos"
-                    className="input-pitch w-full"
+                    placeholder="Ex: Diego Souza"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                   />
                 </div>
-                <div className="col-span-2 sm:col-span-1">
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     WhatsApp do Cliente *
                   </label>
                   <input
@@ -716,30 +708,30 @@ export default function CourtSchedulePage() {
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
                     placeholder="11999999999"
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
-                    Modalidade
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
+                    Tipo de Locação
                   </label>
                   <select
                     value={bookingType}
                     onChange={(e) =>
                       setBookingType(e.target.value as BookingType)
                     }
-                    className="input-pitch w-full"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500 cursor-pointer"
                   >
-                    <option value="avulso">Locação Avulsa</option>
-                    <option value="mensalista">Horário Mensalista</option>
+                    <option value="avulso">Avulso</option>
+                    <option value="mensalista">Mensalista</option>
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
-                    Valor da Reserva (R$) *
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
+                    Valor (R$) *
                   </label>
                   <input
                     type="number"
@@ -748,51 +740,48 @@ export default function CourtSchedulePage() {
                     required
                     value={priceReais}
                     onChange={(e) => setPriceReais(e.target.value)}
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-text-secondary">
-                  Observações (Coletes, Churrasqueira, Bola)
+                <label className="mb-1 block text-xs font-bold text-slate-700">
+                  Observações (Coletes, Churrasqueira)
                 </label>
                 <input
                   type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Opcional"
-                  className="input-pitch w-full"
+                  className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={generateStripeOnCreate}
                   onChange={(e) => setGenerateStripeOnCreate(e.target.checked)}
-                  className="h-4 w-4 accent-verde"
+                  className="h-4 w-4 accent-emerald-600"
                 />
-                <span>
-                  Gerar link de pagamento Stripe Checkout automaticamente ao
-                  salvar
-                </span>
+                <span>Gerar link de pagamento Stripe automaticamente</span>
               </label>
 
-              <div className="flex justify-end gap-2.5 pt-2">
+              <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setBookingModal(null)}
-                  className="btn-secondary px-4 py-2 text-xs"
+                  className="btn-secondary !text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={savingBooking}
-                  className="btn-primary px-5 py-2 text-xs"
+                  className="btn-primary !text-xs"
                 >
-                  {savingBooking ? "Validando e Salvando..." : "Confirmar Reserva"}
+                  {savingBooking ? "Validando..." : "Confirmar Reserva"}
                 </button>
               </div>
             </form>
@@ -800,57 +789,57 @@ export default function CourtSchedulePage() {
         </div>
       )}
 
-      {/* Modal: Detalhes de Locação Existente */}
+      {/* Modal Detalhes Reserva */}
       {selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-          <div className="card w-full max-w-md p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-pitch-border pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <span className="text-xs font-bold uppercase text-verde">
+                <span className="font-mono text-xs font-bold uppercase text-emerald-600">
                   Reserva #{selectedBooking.id.slice(0, 6)}
                 </span>
-                <h3 className="text-lg font-bold text-text-primary">
+                <h3 className="font-[family-name:var(--font-montserrat)] text-lg font-bold text-slate-900">
                   {selectedBooking.client_name}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedBooking(null)}
-                className="rounded-lg p-1 text-text-muted hover:text-text-primary cursor-pointer"
+                className="rounded-lg p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="rounded-xl border border-pitch-border bg-pitch-bg-alt p-4 space-y-2 text-xs">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-text-muted">Data e Horário:</span>
-                <span className="font-mono font-bold text-text-primary">
+                <span className="text-slate-500">Data e Horário:</span>
+                <span className="font-mono font-semibold text-slate-900">
                   {selectedBooking.booking_date.split("-").reverse().join("/")}{" "}
                   · {formatTimeShort(selectedBooking.start_time)} às{" "}
                   {formatTimeShort(selectedBooking.end_time)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-muted">WhatsApp:</span>
-                <span className="font-mono text-text-primary">
+                <span className="text-slate-500">WhatsApp:</span>
+                <span className="font-mono text-slate-900">
                   {selectedBooking.client_phone}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-muted">Tipo:</span>
-                <span className="font-semibold uppercase text-amarelo">
+                <span className="text-slate-500">Tipo:</span>
+                <span className="font-semibold uppercase text-amber-700">
                   {selectedBooking.booking_type}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-muted">Valor:</span>
-                <span className="font-mono font-bold text-verde">
+                <span className="text-slate-500">Valor:</span>
+                <span className="font-[family-name:var(--font-montserrat)] font-black text-emerald-700">
                   {formatCurrencyBRL(selectedBooking.price_cents)}
                 </span>
               </div>
               {selectedBooking.notes && (
-                <div className="pt-1 text-text-secondary">
+                <div className="pt-1 text-slate-600">
                   <strong>Obs:</strong> {selectedBooking.notes}
                 </div>
               )}
@@ -860,17 +849,19 @@ export default function CourtSchedulePage() {
               type="button"
               disabled={generatingStripeId === selectedBooking.id}
               onClick={() => handleBookingStripeWhatsApp(selectedBooking)}
-              className="btn-primary w-full py-2.5 text-xs"
+              className="btn-primary w-full !text-xs !py-2.5 shadow-2xs"
             >
               <MessageCircle size={15} />
-              {generatingStripeId === selectedBooking.id
-                ? "Gerando Link Stripe..."
-                : "Gerar Link Stripe & Enviar no WhatsApp"}
+              <span>
+                {generatingStripeId === selectedBooking.id
+                  ? "Gerando Link..."
+                  : "Gerar Link Stripe & Abrir WhatsApp"}
+              </span>
             </button>
 
-            <div className="border-t border-pitch-border pt-3">
-              <span className="mb-2 block text-[11px] font-semibold uppercase text-text-muted">
-                Status do Pagamento / Reserva:
+            <div className="border-t border-slate-100 pt-3">
+              <span className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono">
+                Status do Aluguel:
               </span>
               <div className="grid grid-cols-3 gap-2">
                 <button
@@ -878,10 +869,10 @@ export default function CourtSchedulePage() {
                   onClick={() =>
                     handleUpdateBookingStatus(selectedBooking.id, "paid")
                   }
-                  className={`rounded-lg border py-2 text-xs font-bold cursor-pointer ${
+                  className={`rounded-lg border py-2 text-xs font-bold cursor-pointer transition ${
                     selectedBooking.payment_status === "paid"
-                      ? "border-verde bg-verde/20 text-verde"
-                      : "border-pitch-border text-text-secondary"
+                      ? "border-emerald-600 bg-emerald-100 text-emerald-800"
+                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   Pago
@@ -891,10 +882,10 @@ export default function CourtSchedulePage() {
                   onClick={() =>
                     handleUpdateBookingStatus(selectedBooking.id, "pending")
                   }
-                  className={`rounded-lg border py-2 text-xs font-bold cursor-pointer ${
+                  className={`rounded-lg border py-2 text-xs font-bold cursor-pointer transition ${
                     selectedBooking.payment_status === "pending"
-                      ? "border-amarelo bg-amarelo/20 text-amarelo-light"
-                      : "border-pitch-border text-text-secondary"
+                      ? "border-amber-500 bg-amber-100 text-amber-800"
+                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   Pendente
@@ -904,7 +895,7 @@ export default function CourtSchedulePage() {
                   onClick={() =>
                     handleUpdateBookingStatus(selectedBooking.id, "cancelled")
                   }
-                  className="rounded-lg border border-pitch-border py-2 text-xs font-bold text-vermelho-light hover:bg-vermelho/15 cursor-pointer"
+                  className="rounded-lg border border-slate-300 bg-white py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 cursor-pointer transition"
                 >
                   Cancelar
                 </button>

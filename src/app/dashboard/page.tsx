@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   Users,
   CreditCard,
@@ -12,7 +11,7 @@ import {
   Clock,
   CheckCircle2,
   MessageCircle,
-  GraduationCap,
+  Trophy,
   ArrowRight,
   Plus,
 } from "lucide-react";
@@ -89,7 +88,7 @@ export default function DashboardPage() {
       (s) => s.status === "pending"
     ).length;
 
-    // Receita Mensal da Escolinha (mês atual)
+    // Receita da Escolinha
     const monthPayments = payments.filter(
       (p) => p.reference_month === currentMonth
     );
@@ -100,7 +99,7 @@ export default function DashboardPage() {
       .filter((p) => p.status !== "paid")
       .reduce((acc, p) => acc + p.amount_cents, 0);
 
-    // Receita de Aluguel de Quadra
+    // Receita da Quadra
     const activeBookings = bookings.filter(
       (b) => b.payment_status !== "cancelled"
     );
@@ -111,7 +110,7 @@ export default function DashboardPage() {
       .filter((b) => b.payment_status === "pending")
       .reduce((acc, b) => acc + b.price_cents, 0);
 
-    // Taxa de Ocupação Semanal (16h/dia * 7 dias = 112 slots semanais)
+    // Ocupação da Quadra
     let classHoursPerWeek = 0;
     classes.forEach((cls) => {
       const startH = parseInt(cls.start_time.split(":")[0], 10);
@@ -126,7 +125,7 @@ export default function DashboardPage() {
       return acc + Math.max(1, endH - startH);
     }, 0);
 
-    const totalWeeklySlots = 16 * 7; // 112 horas (07h às 23h)
+    const totalWeeklySlots = 16 * 7; // 112 horas semanais
     const occupancyRate = Math.min(
       100,
       Math.round(((classHoursPerWeek + bookingHours) / totalWeeklySlots) * 100)
@@ -145,7 +144,7 @@ export default function DashboardPage() {
     };
   }, [students, classes, payments, bookings, currentMonth]);
 
-  // Lista de Próximos Vencimentos / Alunos em Atraso
+  // Lista de Próximos Vencimentos / Em Atraso
   const dueAndOverduePayments = useMemo(() => {
     return payments
       .filter(
@@ -158,7 +157,7 @@ export default function DashboardPage() {
       });
   }, [payments, currentMonth]);
 
-  // Agenda da Quadra de Hoje (Treinos da Escolinha de Hoje + Aluguéis de Hoje)
+  // Agenda da Quadra de Hoje
   const todayClasses = useMemo(
     () => classes.filter((c) => c.days_of_week.includes(todayDayName)),
     [classes, todayDayName]
@@ -178,126 +177,133 @@ export default function DashboardPage() {
       value: String(metrics.activeStudents),
       sub: `${metrics.pendingStudents} aguardando 1ª mensalidade`,
       icon: Users,
-      color: "text-verde",
-      bg: "bg-verde/10",
+      color: "text-emerald-700",
+      bg: "bg-emerald-100",
+      border: "border-emerald-200",
     },
     {
-      label: "Receita Mensal Escolinha",
+      label: "Receita Mensal da Escolinha",
       value: formatCurrencyBRL(metrics.schoolPaidCents),
       sub: `${formatCurrencyBRL(metrics.schoolPendingOrOverdueCents)} pendente / atraso`,
       icon: CreditCard,
-      color: "text-verde-light",
-      bg: "bg-verde/10",
+      color: "text-emerald-700",
+      bg: "bg-emerald-100",
+      border: "border-emerald-200",
     },
     {
-      label: "Receita Aluguel de Quadra",
+      label: "Receita Aluguel da Quadra",
       value: formatCurrencyBRL(
         metrics.courtPaidCents + metrics.courtPendingCents
       ),
       sub: `${formatCurrencyBRL(metrics.courtPaidCents)} pago · ${formatCurrencyBRL(metrics.courtPendingCents)} pendente`,
       icon: CalendarClock,
-      color: "text-amarelo",
-      bg: "bg-amarelo/10",
+      color: "text-amber-700",
+      bg: "bg-amber-100",
+      border: "border-amber-200",
     },
     {
-      label: "Ocupação Semanal da Quadra",
+      label: "Taxa de Ocupação da Quadra",
       value: `${metrics.occupancyRate}%`,
       sub: `${metrics.classHoursPerWeek}h escolinha + ${metrics.bookingHours}h locações`,
       icon: TrendingUp,
-      color: "text-amarelo-light",
-      bg: "bg-amarelo/10",
+      color: "text-indigo-700",
+      bg: "bg-indigo-100",
+      border: "border-indigo-200",
     },
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      {/* Topo */}
+    <div className="mx-auto max-w-7xl space-y-7">
+      {/* Top Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-extrabold text-text-primary">
-            Visão Geral · Escolinha & Quadra
+          <h1 className="font-[family-name:var(--font-montserrat)] text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Painel Geral · Escolinha & Quadra
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Acompanhe em tempo real as matrículas, mensalidades Stripe e a
-            ocupação da quadra.
+          <p className="mt-1 text-sm text-slate-600">
+            Acompanhe o fluxo financeiro em tempo real e a ocupação da grade
+            esportiva.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/dashboard/court"
-            className="btn-secondary px-4 py-2 text-xs sm:text-sm"
+            className="btn-secondary !text-xs sm:!text-sm"
           >
             <CalendarClock size={16} />
-            Reservar Quadra
+            <span>Reservar Horário</span>
           </Link>
           <Link
             href="/dashboard/students"
-            className="btn-primary px-4 py-2 text-xs sm:text-sm"
+            className="btn-primary !text-xs sm:!text-sm"
           >
             <Plus size={16} />
-            Gerenciar Alunos
+            <span>Cadastrar Aluno</span>
           </Link>
         </div>
       </div>
 
       {/* 4 KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {kpiCards.map((stat, idx) => (
-          <motion.div
+        {kpiCards.map((stat) => (
+          <div
             key={stat.label}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.06, duration: 0.35 }}
-            className="card p-5"
+            className={`rounded-xl border ${stat.border} bg-white p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between`}
           >
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-500">
                 {stat.label}
               </span>
-              <div className={`rounded-lg p-2 ${stat.bg}`}>
-                <stat.icon size={17} className={stat.color} />
+              <div
+                className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color}`}
+              >
+                <stat.icon size={18} />
               </div>
             </div>
-            <div className="font-mono text-2xl font-extrabold text-text-primary">
-              {loading ? "..." : stat.value}
+            <div>
+              <div className="font-[family-name:var(--font-montserrat)] text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {loading ? "..." : stat.value}
+              </div>
+              <div className="mt-1 text-xs text-slate-500 font-medium">
+                {stat.sub}
+              </div>
             </div>
-            <div className="mt-1.5 text-xs text-text-secondary">{stat.sub}</div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
-      {/* Duas Colunas: Próximos Vencimentos / Em Atraso & Aluguéis da Quadra de Hoje */}
+      {/* Duas Colunas: Vencimentos/Atrasos & Quadra de Hoje */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Coluna 1: Próximos Vencimentos / Alunos em Atraso */}
-        <div className="card flex flex-col justify-between overflow-hidden">
+        {/* Coluna 1: Próximos Vencimentos & Alunos em Atraso */}
+        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-pitch-border bg-pitch-bg-alt px-5 py-4">
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-4">
               <div>
-                <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                  <AlertTriangle size={17} className="text-amarelo" />
-                  Próximos Vencimentos & Alunos em Atraso
+                <h2 className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900 flex items-center gap-2">
+                  <AlertTriangle size={18} className="text-amber-600" />
+                  Próximos Vencimentos & Atrasos
                 </h2>
-                <p className="text-xs text-text-muted">
-                  Cobranças pendentes ou vencidas no mês atual
+                <p className="text-xs text-slate-500">
+                  Cobranças pendentes ou vencidas neste mês
                 </p>
               </div>
               <Link
                 href="/dashboard/payments"
-                className="inline-flex items-center gap-1 text-xs font-bold text-verde hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
               >
-                Ver Calendário
+                <span>Ver Tudo</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
 
             {dueAndOverduePayments.length === 0 ? (
-              <div className="p-8 text-center text-sm text-text-muted">
-                Todas as mensalidades deste mês estão pagas! 🎉
+              <div className="p-8 text-center text-sm text-slate-500">
+                Todas as mensalidades do mês estão em dia! 🎉
               </div>
             ) : (
-              <div className="divide-y divide-pitch-border">
-                {dueAndOverduePayments.map((payment) => {
+              <div className="divide-y divide-slate-100">
+                {dueAndOverduePayments.slice(0, 6).map((payment) => {
                   const student = studentMap.get(payment.student_id);
                   if (!student) return null;
                   const cls = student.class_id
@@ -305,37 +311,39 @@ export default function DashboardPage() {
                     : null;
                   const waPhone = formatPhoneWhatsApp(student.guardian_phone);
                   const msg = encodeURIComponent(
-                    `Olá ${student.guardian_name}, tudo bem? Passando para lembrar da mensalidade da escolinha do atleta ${student.full_name} (${formatCurrencyBRL(payment.amount_cents)}), com vencimento dia ${student.billing_day}.`
+                    `Olá ${student.guardian_name}! Passando para lembrar da mensalidade da escolinha do atleta ${student.full_name} (${formatCurrencyBRL(payment.amount_cents)}), com vencimento dia ${student.billing_day}.`
                   );
 
                   return (
                     <div
                       key={payment.id}
-                      className="flex items-center justify-between gap-3 px-5 py-3.5"
+                      className="flex items-center justify-between gap-3 px-5 py-3.5 hover:bg-slate-50/60 transition"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-text-primary">
+                          <span className="font-[family-name:var(--font-montserrat)] font-bold text-sm text-slate-900">
                             {student.full_name}
                           </span>
                           {payment.status === "overdue" ? (
-                            <span className="rounded-full bg-vermelho/15 px-2 py-0.5 text-[10px] font-bold text-vermelho-light">
-                              Atrasado (Dia {student.billing_day})
+                            <span className="rounded-full bg-rose-100 border border-rose-200 px-2 py-0.5 text-[10px] font-bold text-rose-700">
+                              Atrasado
                             </span>
                           ) : (
-                            <span className="rounded-full bg-amarelo/15 px-2 py-0.5 text-[10px] font-bold text-amarelo-light">
+                            <span className="rounded-full bg-amber-100 border border-amber-200 px-2 py-0.5 text-[10px] font-bold text-amber-700">
                               Vence Dia {student.billing_day}
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-text-muted">
+                        <div className="text-xs text-slate-500">
                           Resp: {student.guardian_name} ·{" "}
-                          {cls?.name || "Sem turma"}
+                          <span className="text-slate-600 font-medium">
+                            {cls?.name || "Sem turma"}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2.5">
-                        <span className="font-mono text-xs font-bold text-verde">
+                      <div className="flex items-center gap-3">
+                        <span className="font-[family-name:var(--font-montserrat)] text-xs font-black text-emerald-700">
                           {formatCurrencyBRL(payment.amount_cents)}
                         </span>
                         <a
@@ -343,10 +351,10 @@ export default function DashboardPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Cobrar via WhatsApp"
-                          className="inline-flex items-center gap-1 rounded-lg bg-verde/15 px-2.5 py-1.5 text-xs font-bold text-verde transition hover:bg-verde hover:text-[#0a0f0b]"
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-500 shadow-2xs"
                         >
                           <MessageCircle size={13} />
-                          Cobrar
+                          <span>Cobrar</span>
                         </a>
                       </div>
                     </div>
@@ -357,55 +365,55 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Coluna 2: Aluguéis e Treinos da Quadra de Hoje */}
-        <div className="card flex flex-col justify-between overflow-hidden">
+        {/* Coluna 2: Agenda da Quadra de Hoje */}
+        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-pitch-border bg-pitch-bg-alt px-5 py-4">
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-4">
               <div>
-                <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                  <CalendarClock size={17} className="text-verde" />
+                <h2 className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900 flex items-center gap-2">
+                  <CalendarClock size={18} className="text-emerald-600" />
                   Agenda da Quadra de Hoje ({todayDayName})
                 </h2>
-                <p className="text-xs text-text-muted">
-                  Locações avulsas/mensalistas e treinos fixos do dia
+                <p className="text-xs text-slate-500">
+                  Treinos fixos da escolinha e aluguéis do dia
                 </p>
               </div>
               <Link
                 href="/dashboard/court"
-                className="inline-flex items-center gap-1 text-xs font-bold text-verde hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
               >
-                Abrir Grade 07h–23h
+                <span>Grade Completa</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
 
-            <div className="divide-y divide-pitch-border">
-              {/* Treinos de hoje */}
+            <div className="divide-y divide-slate-100">
+              {/* Treinos fixos de hoje (Indigo hachurado) */}
               {todayClasses.map((cls) => (
                 <div
                   key={cls.id}
-                  className="flex items-center justify-between gap-3 px-5 py-3.5 bg-sky-500/5"
+                  className="flex items-center justify-between gap-3 px-5 py-3.5 court-locked-stripe"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-sky-500/15 p-2 text-sky-400">
-                      <GraduationCap size={16} />
+                    <div className="rounded-lg bg-indigo-100 p-2 text-indigo-700 border border-indigo-200">
+                      <Trophy size={16} />
                     </div>
                     <div>
-                      <div className="font-bold text-sm text-text-primary">
+                      <div className="font-[family-name:var(--font-montserrat)] font-bold text-sm text-indigo-950">
                         {cls.name}
                       </div>
-                      <div className="text-xs text-text-muted">
+                      <div className="text-xs text-indigo-700 font-medium">
                         Treino Escolinha · {cls.coach_name}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="font-mono text-xs font-bold text-sky-400">
+                    <span className="font-mono text-xs font-bold text-indigo-900">
                       {formatTimeShort(cls.start_time)} -{" "}
                       {formatTimeShort(cls.end_time)}
                     </span>
-                    <div className="text-[10px] text-sky-300/80 uppercase font-semibold">
-                      Horário Bloqueado
+                    <div className="text-[10px] text-indigo-700 uppercase font-bold tracking-wider">
+                      Trava Quadra
                     </div>
                   </div>
                 </div>
@@ -415,14 +423,14 @@ export default function DashboardPage() {
               {todayBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="flex items-center justify-between gap-3 px-5 py-3.5"
+                  className="flex items-center justify-between gap-3 px-5 py-3.5 hover:bg-slate-50/60 transition"
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={`rounded-lg p-2 ${
                         booking.payment_status === "paid"
-                          ? "bg-verde/15 text-verde"
-                          : "bg-amarelo/15 text-amarelo-light"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                          : "bg-amber-100 text-amber-700 border border-amber-200"
                       }`}
                     >
                       {booking.payment_status === "paid" ? (
@@ -432,22 +440,22 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <div>
-                      <div className="font-bold text-sm text-text-primary">
+                      <div className="font-[family-name:var(--font-montserrat)] font-bold text-sm text-slate-900">
                         {booking.client_name}
                       </div>
-                      <div className="text-xs text-text-muted">
-                        Locação {booking.booking_type} · Tel:{" "}
+                      <div className="text-xs text-slate-500">
+                        Aluguel {booking.booking_type} · Tel:{" "}
                         {booking.client_phone}
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <div className="font-mono text-xs font-bold text-text-primary">
+                    <div className="font-mono text-xs font-bold text-slate-900">
                       {formatTimeShort(booking.start_time)} -{" "}
                       {formatTimeShort(booking.end_time)}
                     </div>
-                    <div className="font-mono text-xs font-semibold text-verde">
+                    <div className="font-[family-name:var(--font-montserrat)] text-xs font-black text-emerald-700">
                       {formatCurrencyBRL(booking.price_cents)}
                     </div>
                   </div>
@@ -455,8 +463,8 @@ export default function DashboardPage() {
               ))}
 
               {todayClasses.length === 0 && todayBookings.length === 0 && (
-                <div className="p-8 text-center text-sm text-text-muted">
-                  Nenhuma reserva ou treino registrado para hoje ainda.
+                <div className="p-8 text-center text-sm text-slate-500">
+                  Nenhum treino ou reserva agendado para hoje ainda.
                 </div>
               )}
             </div>

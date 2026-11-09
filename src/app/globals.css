@@ -1,199 +1,151 @@
 @import "tailwindcss";
 
-/* ==============================
-   StatPitch - Design System
-   Verde & Amarelo — Identidade Futebol
-   ============================== */
-
 @theme {
-  /* Background tones - dark com toque quente */
-  --color-pitch-bg: #0f1410;
-  --color-pitch-bg-alt: #141a16;
-  --color-pitch-surface: #1a221c;
-  --color-pitch-surface-hover: #212b24;
-  --color-pitch-border: #2a3a2e;
-  --color-pitch-border-hover: #3a5040;
-
-  /* Cores principais */
-  --color-verde: #22c55e;
-  --color-verde-light: #4ade80;
-  --color-verde-dark: #16a34a;
-  --color-amarelo: #eab308;
-  --color-amarelo-light: #facc15;
-  --color-amarelo-dark: #ca8a04;
-  --color-vermelho: #ef4444;
-  --color-vermelho-light: #f87171;
-
-  /* Texto */
-  --color-text-primary: #f0f4f1;
-  --color-text-secondary: #9ca89e;
-  --color-text-muted: #6b7c6e;
-
-  /* Fontes */
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Roboto Mono", ui-monospace, monospace;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-montserrat), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-montserrat), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-montserrat: var(--font-montserrat), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-inter: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  * {
+    border-color: #e2e8f0; /* slate-200 */
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f8fafc; /* slate-50 */
+    color: #0f172a; /* slate-900 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading, .font-display {
+    font-family: var(--font-montserrat), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.025em;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  font-family: var(--font-sans);
-  background-color: var(--color-pitch-bg);
-  color: var(--color-text-primary);
-  min-height: 100vh;
-}
-
-/* --- Scrollbar --- */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-pitch-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-pitch-border-hover); }
-
-/* --- Cards --- */
-.card {
-  background: var(--color-pitch-surface);
-  border: 1px solid var(--color-pitch-border);
-  border-radius: 12px;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.card:hover {
-  background: var(--color-pitch-surface-hover);
-  border-color: var(--color-pitch-border-hover);
-}
-
-/* --- Inputs --- */
-.input-pitch {
-  background: var(--color-pitch-surface);
-  border: 1px solid var(--color-pitch-border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: var(--color-text-primary);
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.input-pitch:focus {
-  border-color: var(--color-verde);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
-}
-
-.input-pitch::placeholder {
-  color: var(--color-text-muted);
-}
-
-/* --- Buttons --- */
+/* SportTech UI Component Tokens */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: var(--color-verde);
-  color: #0a0f0b;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-family: var(--font-montserrat), sans-serif;
   font-weight: 700;
-  font-size: 14px;
-  border: none;
-  border-radius: 8px;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  background-color: #059669; /* emerald-600 */
+  color: #ffffff;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .btn-primary:hover {
-  background: var(--color-verde-light);
+  background-color: #10b981; /* emerald-500 */
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
 }
 
 .btn-primary:active {
   transform: translateY(0);
 }
 
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: transparent;
-  color: var(--color-text-primary);
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-family: var(--font-montserrat), sans-serif;
   font-weight: 600;
-  font-size: 14px;
-  border: 1px solid var(--color-pitch-border);
-  border-radius: 8px;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  color: #334155; /* slate-700 */
+  border: 1px solid #cbd5e1; /* slate-300 */
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-secondary:hover {
-  background: var(--color-pitch-surface);
-  border-color: var(--color-pitch-border-hover);
+  background-color: #f1f5f9; /* slate-100 */
+  border-color: #94a3b8; /* slate-400 */
+  color: #0f172a; /* slate-900 */
 }
 
-/* --- Score Input --- */
-.score-input {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 24px;
-  text-align: center;
-  width: 56px;
-  height: 56px;
-  background: var(--color-pitch-surface);
-  border: 1px solid var(--color-pitch-border);
-  border-radius: 8px;
-  color: var(--color-text-primary);
+/* Card padrão SportTech */
+.card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0; /* slate-200 */
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  border-color: #cbd5e1; /* slate-300 */
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+}
+
+/* Inputs padrão SportTech e formulário dos pais */
+.input-pitch {
+  height: 3rem; /* h-12 */
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid #cbd5e1; /* slate-300 */
+  background-color: #ffffff;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: #0f172a; /* slate-900 */
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: all 0.15s ease-in-out;
 }
 
-.score-input:focus {
-  border-color: var(--color-verde);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+.input-pitch:focus {
+  border-color: #059669; /* emerald-600 */
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
 }
 
-/* --- Dividers --- */
-.divider {
-  height: 1px;
-  background: var(--color-pitch-border);
+.input-pitch::placeholder {
+  color: #94a3b8; /* slate-400 */
 }
 
-.divider-gradient {
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-verde), var(--color-amarelo));
-  border-radius: 1px;
+/* Slot da quadra com trava da escolinha (hachurado) */
+.court-locked-stripe {
+  background-color: #e0e7ff; /* indigo-100 */
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(99, 102, 241, 0.08),
+    rgba(99, 102, 241, 0.08) 8px,
+    rgba(99, 102, 241, 0.16) 8px,
+    rgba(99, 102, 241, 0.16) 16px
+  );
 }
 
-/* --- Badge --- */
-.badge-live {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--color-vermelho-light);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-radius: 6px;
+/* Custom scrollbar suave */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
 }
-
-.animate-pulse-dot {
-  animation: pulse-dot 1.5s ease-in-out infinite;
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

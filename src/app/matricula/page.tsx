@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   User,
   HeartPulse,
-  GraduationCap,
+  Trophy,
   ShieldCheck,
   CreditCard,
   CheckCircle2,
@@ -18,6 +18,7 @@ import {
   Phone,
   ArrowLeft,
 } from "lucide-react";
+import { Logo } from "@/components/logo";
 import {
   SchoolClass,
   PlayerPosition,
@@ -208,174 +209,154 @@ export default function MatriculaPublicPage() {
   };
 
   return (
-    <div className="min-h-screen bg-pitch-bg py-8 px-4 sm:px-6">
+    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 text-slate-900">
       <div className="mx-auto max-w-2xl">
-        {/* Top bar */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-verde/15 font-mono text-sm font-bold text-verde">
-              SP
-            </div>
-            <div>
-              <span className="text-lg font-extrabold tracking-tight">
-                Stat<span className="text-verde">Pitch</span>
-              </span>
-              <span className="block text-[11px] text-text-muted">
-                Matrícula Digital · Escolinha de Futebol
-              </span>
-            </div>
-          </div>
-
+        {/* Top Navbar */}
+        <div className="mb-6 flex items-center justify-between rounded-xl bg-white border border-slate-200 p-4 shadow-xs">
+          <Logo href="/" subtitle="Matrícula Digital dos Pais" size="sm" />
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-text-secondary hover:text-verde"
+            className="btn-secondary !h-9 !px-3 !text-xs"
           >
             <ArrowLeft size={14} />
-            Painel Admin
+            <span>Painel</span>
           </Link>
         </div>
 
-        {/* Tela de Confirmação Pós-Envio */}
+        {/* Confirmação Pós-Envio */}
         {enrollmentResult ? (
-          <div className="card p-6 sm:p-8 space-y-6 border-verde/40">
+          <div className="rounded-xl border border-emerald-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-verde/15 text-verde">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                 <CheckCircle2 size={36} />
               </div>
-              <span className="rounded-full bg-verde/15 px-3 py-1 text-xs font-bold text-verde uppercase tracking-wider">
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 uppercase tracking-wider">
                 Pré-Matrícula Registrada
               </span>
-              <h1 className="mt-3 text-2xl font-extrabold text-text-primary">
+              <h1 className="mt-3 font-[family-name:var(--font-montserrat)] text-2xl font-extrabold text-slate-900">
                 Atleta cadastrado com sucesso!
               </h1>
-              <p className="mt-1 text-sm text-text-secondary max-w-md">
+              <p className="mt-1 text-sm text-slate-600 max-w-md">
                 Os dados de{" "}
-                <strong className="text-text-primary">
+                <strong className="text-slate-900">
                   {enrollmentResult.studentName}
                 </strong>{" "}
-                já estão salvos no sistema. Conclua o pagamento da 1ª mensalidade
-                para ativar a vaga imediatamente.
+                já estão no sistema. Realize o pagamento da 1ª mensalidade para
+                confirmar a vaga.
               </p>
             </div>
 
             {/* Resumo */}
-            <div className="rounded-xl border border-pitch-border bg-pitch-bg-alt p-4 space-y-2.5 text-sm">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2.5 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-text-muted">Atleta:</span>
-                <span className="font-semibold text-text-primary">
+                <span className="text-slate-500">Atleta:</span>
+                <span className="font-semibold text-slate-900">
                   {enrollmentResult.studentName}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-text-muted">Turma Vinculada:</span>
-                <span className="font-semibold text-verde">
+                <span className="text-slate-500">Turma Vinculada:</span>
+                <span className="font-semibold text-emerald-700">
                   {enrollmentResult.className}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-text-muted">Vencimento Mensal:</span>
-                <span className="font-mono text-text-primary">
+                <span className="text-slate-500">Dia de Vencimento:</span>
+                <span className="font-mono text-slate-900 font-semibold">
                   Todo dia {enrollmentResult.billingDay}
                 </span>
               </div>
-              <div className="divider my-2" />
+              <div className="h-px bg-slate-200 my-2" />
               <div className="flex items-center justify-between">
-                <span className="font-medium text-text-secondary">
+                <span className="font-medium text-slate-700">
                   Valor da 1ª Mensalidade:
                 </span>
-                <span className="font-mono text-lg font-extrabold text-verde">
+                <span className="font-[family-name:var(--font-montserrat)] text-xl font-black text-emerald-700">
                   {formatCurrencyBRL(enrollmentResult.monthlyFeeCents)}
                 </span>
               </div>
             </div>
 
-            {/* Botões de Pagamento Stripe */}
+            {/* Botões Stripe */}
             <div className="space-y-3">
               <a
                 href={enrollmentResult.checkoutUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary w-full py-3.5 text-base"
+                className="btn-primary w-full h-14 !text-base shadow-sm"
               >
                 <CreditCard size={18} />
-                Pagar 1ª Mensalidade via Stripe Checkout
-                <ExternalLink size={15} />
+                <span>Pagar 1ª Mensalidade via Stripe</span>
+                <ExternalLink size={16} />
               </a>
 
               <button
                 type="button"
                 onClick={handleCopyPaymentLink}
-                className="btn-secondary w-full py-3 text-sm"
+                className="btn-secondary w-full h-12 text-sm"
               >
                 {copiedLink ? (
                   <>
-                    <Check size={16} className="text-verde" />
-                    Link de Pagamento Copiado!
+                    <Check size={16} className="text-emerald-600" />
+                    <span>Link Stripe Copiado!</span>
                   </>
                 ) : (
                   <>
                     <Copy size={16} />
-                    Copiar Link de Pagamento Stripe
+                    <span>Copiar Link de Pagamento Stripe</span>
                   </>
                 )}
               </button>
             </div>
 
-            {enrollmentResult.simulatedStripe && (
-              <p className="rounded-lg border border-amarelo/30 bg-amarelo/10 p-3 text-center text-xs text-amarelo-light">
-                Modo Demonstração: Adicione sua <code>STRIPE_SECRET_KEY</code> na
-                Vercel para redirecionar ao checkout oficial da Stripe.
-              </p>
-            )}
-
             <div className="pt-2 text-center">
               <button
                 type="button"
                 onClick={() => setEnrollmentResult(null)}
-                className="text-xs font-medium text-text-muted hover:text-text-primary underline cursor-pointer"
+                className="text-xs font-semibold text-slate-500 hover:text-slate-900 underline cursor-pointer"
               >
-                Realizar matrícula de outro atleta
+                Cadastrar outro atleta
               </button>
             </div>
           </div>
         ) : (
-          /* Formulário Mobile-First em 3 Seções */
+          /* Formulário Ultra-Limpo */
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Cabeçalho do Formulário */}
-            <div className="card p-6 border-verde/30">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-verde/15 px-3 py-1 text-xs font-bold text-verde mb-3">
+            {/* Banner de Boas-Vindas */}
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 mb-2">
                 <Sparkles size={13} />
-                Matrícula Online 100% Digital
+                Matrícula Digital Online
               </div>
-              <h1 className="text-2xl font-extrabold text-text-primary sm:text-3xl">
-                Ficha de Inscrição do Atleta
+              <h1 className="font-[family-name:var(--font-montserrat)] text-2xl font-black text-slate-900 sm:text-3xl tracking-tight">
+                Ficha de Inscrição da Escolinha
               </h1>
-              <p className="mt-1.5 text-sm text-text-secondary">
-                Preencha os dados abaixo em menos de 2 minutos. O sistema sugere
-                automaticamente a turma ideal pela idade do aluno.
+              <p className="mt-1 text-sm text-slate-600">
+                Preencha os dados do atleta. A turma adequada será sugerida
+                automaticamente pela data de nascimento.
               </p>
             </div>
 
             {errorMsg && (
-              <div className="rounded-xl border border-vermelho/40 bg-vermelho/15 p-4 text-sm text-vermelho-light">
+              <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 font-medium">
                 {errorMsg}
               </div>
             )}
 
             {/* SEÇÃO 1: DADOS DO ATLETA */}
-            <section className="card p-6 space-y-5">
-              <div className="flex items-center justify-between border-b border-pitch-border pb-3">
+            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-verde/15 font-mono text-xs font-bold text-verde">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 font-[family-name:var(--font-montserrat)] text-xs font-bold text-white">
                     1
-                  </div>
-                  <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                    <User size={17} className="text-verde" />
+                  </span>
+                  <h2 className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900 flex items-center gap-2">
+                    <User size={18} className="text-emerald-600" />
                     Dados do Atleta
                   </h2>
                 </div>
                 {birthDate && athleteAge > 0 && (
-                  <span className="rounded-full bg-verde/15 px-3 py-1 font-mono text-xs font-bold text-verde">
+                  <span className="rounded-full bg-emerald-100 px-3 py-1 font-mono text-xs font-bold text-emerald-800">
                     {athleteAge} anos · {subCategory}
                   </span>
                 )}
@@ -383,7 +364,7 @@ export default function MatriculaPublicPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
                     Nome Completo do Aluno *
                   </label>
                   <input
@@ -392,12 +373,12 @@ export default function MatriculaPublicPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Ex: Gabriel Martins Oliveira"
-                    className="input-pitch w-full"
+                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
                     Data de Nascimento *
                   </label>
                   <input
@@ -405,12 +386,12 @@ export default function MatriculaPublicPage() {
                     required
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
-                    className="input-pitch w-full"
+                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
                     Posição em que Joga *
                   </label>
                   <select
@@ -418,7 +399,7 @@ export default function MatriculaPublicPage() {
                     onChange={(e) =>
                       setPosition(e.target.value as PlayerPosition)
                     }
-                    className="input-pitch w-full"
+                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
                   >
                     {PLAYER_POSITIONS.map((pos) => (
                       <option key={pos} value={pos}>
@@ -429,7 +410,7 @@ export default function MatriculaPublicPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
                     Pé Dominante *
                   </label>
                   <div className="grid grid-cols-3 gap-2.5">
@@ -438,10 +419,10 @@ export default function MatriculaPublicPage() {
                         key={foot}
                         type="button"
                         onClick={() => setDominantFoot(foot)}
-                        className={`rounded-lg border py-2.5 text-xs font-bold transition cursor-pointer ${
+                        className={`h-11 rounded-lg border text-xs font-bold transition cursor-pointer ${
                           dominantFoot === foot
-                            ? "border-verde bg-verde/15 text-verde"
-                            : "border-pitch-border bg-pitch-bg-alt text-text-secondary hover:border-pitch-border-hover"
+                            ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-2xs"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         {foot}
@@ -451,35 +432,35 @@ export default function MatriculaPublicPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-text-secondary">
-                    <HeartPulse size={14} className="text-vermelho-light" />
+                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <HeartPulse size={14} className="text-rose-500" />
                     Ficha Médica / Observações de Saúde
                   </label>
                   <textarea
                     rows={2}
                     value={healthNotes}
                     onChange={(e) => setHealthNotes(e.target.value)}
-                    placeholder="Informe tipo sanguíneo, alergias a medicamentos, asma ou restrições físicas (opcional)"
-                    className="input-pitch w-full"
+                    placeholder="Tipo sanguíneo, alergias a remédios, asma ou restrições (opcional)"
+                    className="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
               </div>
             </section>
 
             {/* SEÇÃO 2: SUGESTÃO AUTOMÁTICA DE TURMA */}
-            <section className="card p-6 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-pitch-border pb-3">
+            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-verde/15 font-mono text-xs font-bold text-verde">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 font-[family-name:var(--font-montserrat)] text-xs font-bold text-white">
                     2
-                  </div>
+                  </span>
                   <div>
-                    <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                      <GraduationCap size={18} className="text-verde" />
+                    <h2 className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900 flex items-center gap-2">
+                      <Trophy size={18} className="text-emerald-600" />
                       Turma Sugerida ({subCategory || "Por Idade"})
                     </h2>
-                    <p className="text-xs text-text-muted">
-                      Triagem automática para {athleteAge} anos de idade
+                    <p className="text-xs text-slate-500">
+                      Triagem calculada para {athleteAge} anos
                     </p>
                   </div>
                 </div>
@@ -487,16 +468,16 @@ export default function MatriculaPublicPage() {
                 <button
                   type="button"
                   onClick={() => setShowAllClasses((prev) => !prev)}
-                  className="text-xs font-semibold text-verde hover:underline cursor-pointer"
+                  className="text-xs font-semibold text-emerald-700 hover:underline cursor-pointer"
                 >
                   {showAllClasses
-                    ? "Mostrar apenas recomendadas"
+                    ? "Ver apenas recomendadas"
                     : "Ver todas as turmas"}
                 </button>
               </div>
 
               {loadingClasses ? (
-                <div className="py-6 text-center text-sm text-text-muted">
+                <div className="py-6 text-center text-sm text-slate-500">
                   Carregando turmas disponíveis...
                 </div>
               ) : (
@@ -510,46 +491,46 @@ export default function MatriculaPublicPage() {
                       <div
                         key={cls.id}
                         onClick={() => setSelectedClassId(cls.id)}
-                        className={`rounded-xl border p-4 transition cursor-pointer ${
+                        className={`rounded-xl border p-4 transition-all cursor-pointer ${
                           isSelected
-                            ? "border-verde bg-verde/10"
-                            : "border-pitch-border bg-pitch-bg-alt hover:border-pitch-border-hover"
+                            ? "border-2 border-emerald-600 bg-emerald-50/60 shadow-xs"
+                            : "border-slate-200 bg-white hover:border-slate-300"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-bold text-text-primary">
+                              <span className="font-[family-name:var(--font-montserrat)] font-bold text-slate-900">
                                 {cls.name}
                               </span>
                               {isRecommended && (
-                                <span className="rounded bg-verde/20 px-2 py-0.5 text-[10px] font-bold text-verde uppercase">
-                                  Ideal p/ {athleteAge} anos
+                                <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 uppercase">
+                                  Ideal para {athleteAge} anos
                                 </span>
                               )}
                             </div>
-                            <p className="mt-1 text-xs text-text-secondary">
+                            <p className="mt-1 text-xs text-slate-600">
                               {cls.coach_name} · Faixa: {cls.min_age} a{" "}
                               {cls.max_age} anos
                             </p>
                           </div>
                           <div className="text-right">
-                            <div className="font-mono text-base font-extrabold text-verde">
+                            <div className="font-[family-name:var(--font-montserrat)] text-base font-extrabold text-emerald-700">
                               {formatCurrencyBRL(cls.monthly_fee_cents)}
                             </div>
-                            <div className="text-[10px] text-text-muted">
+                            <div className="text-[10px] text-slate-400">
                               /mês
                             </div>
                           </div>
                         </div>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-text-secondary">
-                          <span className="inline-flex items-center gap-1 rounded bg-pitch-surface px-2 py-1">
-                            <Calendar size={13} className="text-amarelo" />
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                          <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-2.5 py-1 font-medium">
+                            <Calendar size={13} className="text-amber-600" />
                             {cls.days_of_week.join(", ")}
                           </span>
-                          <span className="inline-flex items-center gap-1 rounded bg-pitch-surface px-2 py-1 font-mono">
-                            <Clock size={13} className="text-verde" />
+                          <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-2.5 py-1 font-mono">
+                            <Clock size={13} className="text-emerald-600" />
                             {formatTimeShort(cls.start_time)} às{" "}
                             {formatTimeShort(cls.end_time)}
                           </span>
@@ -562,20 +543,20 @@ export default function MatriculaPublicPage() {
             </section>
 
             {/* SEÇÃO 3: DADOS DO RESPONSÁVEL FINANCEIRO */}
-            <section className="card p-6 space-y-5">
-              <div className="flex items-center gap-2.5 border-b border-pitch-border pb-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-verde/15 font-mono text-xs font-bold text-verde">
+            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+              <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 font-[family-name:var(--font-montserrat)] text-xs font-bold text-white">
                   3
-                </div>
-                <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
-                  <ShieldCheck size={18} className="text-verde" />
+                </span>
+                <h2 className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900 flex items-center gap-2">
+                  <ShieldCheck size={18} className="text-emerald-600" />
                   Dados do Responsável Financeiro
                 </h2>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
                     Nome do Pai / Mãe / Responsável *
                   </label>
                   <input
@@ -584,12 +565,12 @@ export default function MatriculaPublicPage() {
                     value={guardianName}
                     onChange={(e) => setGuardianName(e.target.value)}
                     placeholder="Ex: Roberto Oliveira"
-                    className="input-pitch w-full"
+                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-secondary">
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
                     CPF do Responsável *
                   </label>
                   <input
@@ -598,13 +579,13 @@ export default function MatriculaPublicPage() {
                     value={guardianCpf}
                     onChange={(e) => setGuardianCpf(e.target.value)}
                     placeholder="000.000.000-00"
-                    className="input-pitch w-full font-mono"
+                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 font-mono focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1.5 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-text-secondary">
-                    <Phone size={12} className="text-verde" />
+                  <label className="mb-1.5 flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-slate-600">
+                    <Phone size={13} className="text-emerald-600" />
                     WhatsApp (com DDD) *
                   </label>
                   <input
@@ -613,26 +594,26 @@ export default function MatriculaPublicPage() {
                     value={guardianPhone}
                     onChange={(e) => setGuardianPhone(e.target.value)}
                     placeholder="(11) 99999-9999"
-                    className="input-pitch w-full font-mono"
+                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 font-mono focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-secondary">
-                    E-mail (para recibos Stripe)
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
+                    E-mail do Responsável (para recibos)
                   </label>
                   <input
                     type="email"
                     value={guardianEmail}
                     onChange={(e) => setGuardianEmail(e.target.value)}
                     placeholder="responsavel@email.com"
-                    className="input-pitch w-full"
+                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-text-secondary">
-                    Dia Preferencial de Vencimento da Mensalidade *
+                  <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
+                    Dia Preferencial de Vencimento *
                   </label>
                   <div className="grid grid-cols-4 gap-2.5">
                     {BILLING_DAYS.map((day) => (
@@ -640,10 +621,10 @@ export default function MatriculaPublicPage() {
                         key={day}
                         type="button"
                         onClick={() => setBillingDay(day)}
-                        className={`rounded-lg border py-2.5 font-mono text-sm font-bold transition cursor-pointer ${
+                        className={`h-11 rounded-lg border font-mono text-sm font-bold transition cursor-pointer ${
                           billingDay === day
-                            ? "border-verde bg-verde/15 text-verde"
-                            : "border-pitch-border bg-pitch-bg-alt text-text-secondary hover:border-pitch-border-hover"
+                            ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-2xs"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         Dia {day}
@@ -653,31 +634,33 @@ export default function MatriculaPublicPage() {
                 </div>
               </div>
 
-              <label className="flex items-start gap-2.5 pt-2 text-xs text-text-secondary cursor-pointer">
+              <label className="flex items-start gap-2.5 pt-2 text-xs text-slate-600 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-verde"
+                  className="mt-0.5 h-4 w-4 accent-emerald-600"
                 />
                 <span>
-                  Declaro que o atleta está apto para a prática esportiva e
-                  concordo com os termos de matrícula e cobrança mensal da
-                  escolinha.
+                  Declaro que o atleta está apto para atividades físicas e
+                  aceito os termos de matrícula e mensalidade da escolinha.
                 </span>
               </label>
 
+              {/* Botão de Envio Largo H-14 */}
               <button
                 type="submit"
                 disabled={submitting}
-                className="btn-primary w-full py-3.5 text-base disabled:opacity-50"
+                className="w-full h-14 bg-emerald-600 hover:bg-emerald-500 text-white font-[family-name:var(--font-montserrat)] font-bold text-base rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
-                <CreditCard size={18} />
-                {submitting
-                  ? "Salvando Matrícula e Gerando Checkout..."
-                  : `Finalizar Matrícula (${formatCurrencyBRL(
-                      selectedClass?.monthly_fee_cents || 16000
-                    )})`}
+                <CreditCard size={19} />
+                <span>
+                  {submitting
+                    ? "Processando Matrícula..."
+                    : `Concluir e Pagar Matrícula (${formatCurrencyBRL(
+                        selectedClass?.monthly_fee_cents || 16000
+                      )})`}
+                </span>
               </button>
             </section>
           </form>

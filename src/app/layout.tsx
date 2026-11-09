@@ -1,37 +1,34 @@
 import type { Metadata } from "next";
-import { Inter, Roboto_Mono } from "next/font/google";
+import { Montserrat, Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-montserrat",
+  weight: ["400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
 
-const robotoMono = Roboto_Mono({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "StatPitch — Gestão de Escolinha de Futebol & Locação de Quadras",
   description:
-    "Plataforma SaaS híbrida para gestão de escolinhas de futebol (categorias Sub, matrícula online via WhatsApp, mensalidades Stripe) e agenda de locação de quadras sem conflito de horários.",
+    "Plataforma SportTech para gestão de escolinhas de futebol e locação de quadras sem conflitos, com matrícula digital e pagamentos Stripe.",
   keywords: [
     "escolinha de futebol",
     "aluguel de quadra",
     "gestão esportiva",
-    "mensalidade escolar",
+    "mensalidades",
     "stripe",
-    "quadra society",
+    "futebol society",
+    "sporttech",
   ],
-  openGraph: {
-    title: "StatPitch — Gestão de Escolinha de Futebol & Locação de Quadras",
-    description:
-      "Unifique as turmas da sua escolinha e a locação da sua quadra em uma única agenda e fluxo financeiro com Stripe.",
-    type: "website",
-  },
 };
 
 export default function RootLayout({
@@ -40,11 +37,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="dark">
-      <body
-        className={`${inter.variable} ${robotoMono.variable} antialiased`}
-      >
-        <div className="min-h-screen">{children}</div>
+    <html
+      lang="pt-BR"
+      className={`${inter.variable} ${montserrat.variable} antialiased`}
+    >
+      <body className="min-h-screen bg-slate-50 text-slate-900 selection:bg-emerald-500 selection:text-white">
+        {children}
       </body>
     </html>
   );

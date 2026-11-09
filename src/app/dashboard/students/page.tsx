@@ -12,8 +12,10 @@ import {
   CheckCircle2,
   Clock,
   AlertTriangle,
-  ExternalLink,
+  ArrowUpRight,
   X,
+  Footprints,
+  Calendar,
 } from "lucide-react";
 import {
   Student,
@@ -40,6 +42,29 @@ import {
 } from "@/lib/data-service";
 
 const SUB_CATEGORIES = ["Sub-7", "Sub-9", "Sub-11", "Sub-13", "Sub-15", "Sub-17"];
+
+function getPositionBadge(pos: PlayerPosition) {
+  switch (pos) {
+    case "Goleiro":
+      return "bg-amber-100 text-amber-800 border-amber-200";
+    case "Zagueiro":
+    case "Lateral":
+      return "bg-sky-100 text-sky-800 border-sky-200";
+    case "Volante":
+    case "Meia":
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    case "Atacante":
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    default:
+      return "bg-slate-100 text-slate-700 border-slate-200";
+  }
+}
+
+function getInitials(name: string) {
+  const parts = name.trim().split(" ");
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 export default function StudentsDashboardPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -218,16 +243,16 @@ export default function StudentsDashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      {/* Header */}
+      {/* Page Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-extrabold text-text-primary flex items-center gap-2.5">
-            <Users size={24} className="text-verde" />
-            Alunos & Fichas Técnicas
+          <h1 className="font-[family-name:var(--font-montserrat)] text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
+            <Users size={24} className="text-emerald-600" />
+            Gestão de Alunos (Fichas & Cromos)
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Gerencie atletas por turma, categoria Sub, posição em campo, ficha
-            médica e contato rápido via WhatsApp.
+          <p className="mt-1 text-sm text-slate-600">
+            Fichas técnicas dos atletas por turma, posição de jogo, pé dominante,
+            observações de saúde e contato direto com os pais.
           </p>
         </div>
 
@@ -235,41 +260,41 @@ export default function StudentsDashboardPage() {
           <Link
             href="/matricula"
             target="_blank"
-            className="btn-secondary px-4 py-2.5 text-xs sm:text-sm"
+            className="btn-secondary !text-xs sm:!text-sm"
           >
-            Link Público (/matricula)
-            <ExternalLink size={14} />
+            <span>Link dos Pais (/matricula)</span>
+            <ArrowUpRight size={14} />
           </Link>
           <button
             type="button"
             onClick={() => setShowNewModal(true)}
-            className="btn-primary px-4 py-2.5 text-xs sm:text-sm"
+            className="btn-primary !text-xs sm:!text-sm"
           >
             <Plus size={16} />
-            Novo Aluno Manual
+            <span>Novo Aluno Manual</span>
           </button>
         </div>
       </div>
 
       {/* Barra de Filtros */}
-      <div className="card p-4">
-        <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-text-muted">
-          <Filter size={13} className="text-verde" />
-          Filtros de Triagem Esportiva e Financeira
+      <div className="card p-4 space-y-3">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">
+          <Filter size={13} className="text-emerald-600" />
+          Filtros de Triagem Esportiva
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {/* Busca */}
           <div className="relative">
             <Search
               size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Atleta, pai/mãe ou CPF..."
-              className="input-pitch w-full pl-9 text-xs"
+              placeholder="Buscar aluno, responsável..."
+              className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 text-xs text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
             />
           </div>
 
@@ -277,7 +302,7 @@ export default function StudentsDashboardPage() {
           <select
             value={filterClassId}
             onChange={(e) => setFilterClassId(e.target.value)}
-            className="input-pitch w-full text-xs"
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none cursor-pointer"
           >
             <option value="ALL">Todas as Turmas</option>
             {classes.map((c) => (
@@ -291,7 +316,7 @@ export default function StudentsDashboardPage() {
           <select
             value={filterSub}
             onChange={(e) => setFilterSub(e.target.value)}
-            className="input-pitch w-full text-xs"
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none cursor-pointer"
           >
             <option value="ALL">Todas Categorias (Sub-X)</option>
             {SUB_CATEGORIES.map((sub) => (
@@ -305,7 +330,7 @@ export default function StudentsDashboardPage() {
           <select
             value={filterPosition}
             onChange={(e) => setFilterPosition(e.target.value)}
-            className="input-pitch w-full text-xs"
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none cursor-pointer"
           >
             <option value="ALL">Todas as Posições</option>
             {PLAYER_POSITIONS.map((pos) => (
@@ -319,33 +344,33 @@ export default function StudentsDashboardPage() {
           <select
             value={filterFinancial}
             onChange={(e) => setFilterFinancial(e.target.value)}
-            className="input-pitch w-full text-xs"
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-xs text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none cursor-pointer"
           >
-            <option value="ALL">Todos Status Financeiros</option>
-            <option value="paid">Mensalidade em Dia (Pago)</option>
+            <option value="ALL">Status Financeiro</option>
+            <option value="paid">Mensalidade Paga</option>
             <option value="pending">Mensalidade Pendente</option>
-            <option value="overdue">Mensalidade em Atraso</option>
+            <option value="overdue">Em Atraso</option>
           </select>
         </div>
       </div>
 
-      {/* Lista de Alunos */}
+      {/* Grid de Cards (Estilo Cromo Esportivo) */}
       {loading ? (
-        <div className="card p-12 text-center text-sm text-text-muted">
-          Carregando atletas matriculados...
+        <div className="card p-12 text-center text-sm text-slate-500">
+          Carregando cromos dos atletas...
         </div>
       ) : filteredStudents.length === 0 ? (
-        <div className="card p-12 text-center space-y-3">
-          <p className="text-base font-semibold text-text-primary">
-            Nenhum aluno encontrado com os filtros selecionados.
+        <div className="card p-12 text-center space-y-2">
+          <p className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900">
+            Nenhum atleta encontrado com os filtros selecionados.
           </p>
-          <p className="text-xs text-text-muted">
-            Compartilhe o link <code>/matricula</code> com os pais ou cadastre um
-            novo atleta manualmente.
+          <p className="text-xs text-slate-500">
+            Envie o link <code>/matricula</code> para os pais cadastrarem novos
+            alunos pelo WhatsApp.
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {filteredStudents.map((student) => {
             const age = calculateAge(student.birth_date);
             const sub = getSubCategory(age);
@@ -356,49 +381,56 @@ export default function StudentsDashboardPage() {
             const waMessage = encodeURIComponent(
               `Olá ${student.guardian_name}, tudo bem? Aqui é da coordenação da Escolinha sobre o atleta ${student.full_name} (${sub}).`
             );
+            const initials = getInitials(student.full_name);
+            const posBadgeStyle = getPositionBadge(student.position);
 
             return (
               <div
                 key={student.id}
-                className="card p-5 flex flex-col justify-between gap-4"
+                className="rounded-xl border border-slate-200 bg-white shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden"
               >
-                <div className="space-y-3">
-                  {/* Topo do Card */}
+                {/* Cabeçalho do Cromo */}
+                <div className="p-5 space-y-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-base font-bold text-text-primary">
+                    <div className="flex items-center gap-3">
+                      {/* Avatar Cromo Esportivo */}
+                      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white font-[family-name:var(--font-montserrat)] font-bold text-sm border-2 border-emerald-500 shadow-xs">
+                        <span>{initials}</span>
+                      </div>
+
+                      <div>
+                        <h2 className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900 leading-tight">
                           {student.full_name}
                         </h2>
-                        <span className="rounded-md bg-verde/15 px-2 py-0.5 font-mono text-xs font-bold text-verde">
-                          {age} anos · {sub}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-text-secondary">
-                        <span className="rounded bg-pitch-bg-alt px-2 py-0.5 font-semibold text-amarelo">
-                          {student.position}
-                        </span>
-                        <span>Pé {student.dominant_foot}</span>
-                        <span>· Venc. dia {student.billing_day}</span>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <span
+                            className={`rounded-md border px-2 py-0.5 text-[11px] font-bold ${posBadgeStyle}`}
+                          >
+                            {student.position}
+                          </span>
+                          <span className="rounded-md bg-slate-100 text-slate-700 font-mono text-[11px] font-bold px-2 py-0.5">
+                            {age} anos ({sub})
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Badge Financeiro */}
-                    <div>
+                    {/* Badge de Status Financeiro */}
+                    <div className="shrink-0">
                       {finStatus === "paid" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-verde/15 px-2.5 py-1 text-[11px] font-bold text-verde">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
                           <CheckCircle2 size={12} />
                           Pago
                         </span>
                       )}
                       {finStatus === "pending" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amarelo/15 px-2.5 py-1 text-[11px] font-bold text-amarelo-light">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-200 px-2.5 py-0.5 text-[11px] font-bold text-amber-700">
                           <Clock size={12} />
                           Pendente
                         </span>
                       )}
                       {finStatus === "overdue" && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-vermelho/15 px-2.5 py-1 text-[11px] font-bold text-vermelho-light">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 border border-rose-200 px-2.5 py-0.5 text-[11px] font-bold text-rose-700">
                           <AlertTriangle size={12} />
                           Atrasado
                         </span>
@@ -406,31 +438,40 @@ export default function StudentsDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Ficha Médica */}
+                  {/* Informações Técnicas */}
+                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50 rounded-lg p-2.5 border border-slate-100">
+                    <div className="flex items-center gap-1.5">
+                      <Footprints size={14} className="text-slate-400" />
+                      <span>Pé {student.dominant_foot}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 font-mono">
+                      <Calendar size={14} className="text-slate-400" />
+                      <span>Venc. Dia {student.billing_day}</span>
+                    </div>
+                  </div>
+
+                  {/* Ficha Médica se houver */}
                   {student.health_notes && (
-                    <div className="flex items-start gap-2 rounded-lg border border-pitch-border bg-pitch-bg-alt px-3 py-2 text-xs text-text-secondary">
-                      <HeartPulse
-                        size={14}
-                        className="mt-0.5 shrink-0 text-vermelho-light"
-                      />
-                      <span>{student.health_notes}</span>
+                    <div className="flex items-start gap-2 rounded-lg border border-rose-100 bg-rose-50/60 px-3 py-2 text-xs text-rose-800">
+                      <HeartPulse size={14} className="mt-0.5 shrink-0 text-rose-500" />
+                      <span className="leading-snug">{student.health_notes}</span>
                     </div>
                   )}
 
-                  {/* Seletor de Turma & Status */}
-                  <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  {/* Seletor Rápido de Turma & Matrícula */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
                     <div>
-                      <label className="mb-1 block text-[10px] font-semibold uppercase text-text-muted">
-                        Turma Vinculada
+                      <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Turma
                       </label>
                       <select
                         value={student.class_id || ""}
                         onChange={(e) =>
                           handleChangeClass(student.id, e.target.value)
                         }
-                        className="input-pitch w-full py-1.5 text-xs"
+                        className="h-8 w-full rounded-md border border-slate-300 bg-white px-2 text-xs text-slate-800 outline-none focus:border-emerald-500"
                       >
-                        <option value="">Sem turma (Em triagem)</option>
+                        <option value="">Sem turma (Triagem)</option>
                         {classes.map((c) => (
                           <option key={c.id} value={c.id}>
                             {c.name}
@@ -440,8 +481,8 @@ export default function StudentsDashboardPage() {
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-[10px] font-semibold uppercase text-text-muted">
-                        Status da Matrícula
+                      <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Matrícula
                       </label>
                       <select
                         value={student.status}
@@ -451,7 +492,7 @@ export default function StudentsDashboardPage() {
                             e.target.value as StudentStatus
                           )
                         }
-                        className="input-pitch w-full py-1.5 text-xs"
+                        className="h-8 w-full rounded-md border border-slate-300 bg-white px-2 text-xs text-slate-800 outline-none focus:border-emerald-500"
                       >
                         <option value="active">Ativo</option>
                         <option value="pending">Pendente</option>
@@ -461,14 +502,14 @@ export default function StudentsDashboardPage() {
                   </div>
                 </div>
 
-                {/* Rodapé: Responsável + Botão Direto WhatsApp */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-pitch-border pt-3">
-                  <div className="text-xs">
-                    <div className="font-semibold text-text-primary">
-                      Resp: {student.guardian_name}
+                {/* Rodapé do Cromo: Responsável + Botão WhatsApp */}
+                <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/70 px-4 py-3">
+                  <div className="text-xs leading-tight">
+                    <div className="font-semibold text-slate-900">
+                      {student.guardian_name}
                     </div>
-                    <div className="font-mono text-[11px] text-text-muted">
-                      CPF: {student.guardian_cpf} · Tel: {student.guardian_phone}
+                    <div className="font-mono text-[11px] text-slate-500">
+                      {student.guardian_phone}
                     </div>
                   </div>
 
@@ -476,10 +517,10 @@ export default function StudentsDashboardPage() {
                     href={`https://wa.me/${waNumber}?text=${waMessage}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-verde/15 px-3 py-2 text-xs font-bold text-verde transition hover:bg-verde hover:text-[#0a0f0b]"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-500 shadow-2xs"
                   >
                     <MessageCircle size={14} />
-                    WhatsApp do Pai/Mãe
+                    <span>WhatsApp</span>
                   </a>
                 </div>
               </div>
@@ -488,18 +529,18 @@ export default function StudentsDashboardPage() {
         </div>
       )}
 
-      {/* Modal de Cadastro Manual */}
+      {/* Modal Novo Aluno */}
       {showNewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-          <div className="card max-h-[90vh] w-full max-w-xl overflow-y-auto p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-pitch-border pb-3">
-              <h2 className="text-lg font-bold text-text-primary">
-                Cadastrar Novo Aluno
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="font-[family-name:var(--font-montserrat)] text-lg font-bold text-slate-900">
+                Cadastrar Novo Atleta
               </h2>
               <button
                 type="button"
                 onClick={() => setShowNewModal(false)}
-                className="rounded-lg p-1 text-text-muted hover:text-text-primary cursor-pointer"
+                className="rounded-lg p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -508,7 +549,7 @@ export default function StudentsDashboardPage() {
             <form onSubmit={handleCreateStudent} className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Nome Completo do Atleta *
                   </label>
                   <input
@@ -516,13 +557,13 @@ export default function StudentsDashboardPage() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="input-pitch w-full"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     placeholder="Ex: Arthur Gomes"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Data de Nascimento *
                   </label>
                   <input
@@ -530,20 +571,20 @@ export default function StudentsDashboardPage() {
                     required
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
-                    className="input-pitch w-full"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
-                    Posição *
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
+                    Posição em Campo *
                   </label>
                   <select
                     value={position}
                     onChange={(e) =>
                       setPosition(e.target.value as PlayerPosition)
                     }
-                    className="input-pitch w-full"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                   >
                     {PLAYER_POSITIONS.map((p) => (
                       <option key={p} value={p}>
@@ -554,7 +595,7 @@ export default function StudentsDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Pé Dominante
                   </label>
                   <select
@@ -562,7 +603,7 @@ export default function StudentsDashboardPage() {
                     onChange={(e) =>
                       setDominantFoot(e.target.value as DominantFoot)
                     }
-                    className="input-pitch w-full"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                   >
                     {DOMINANT_FEET.map((f) => (
                       <option key={f} value={f}>
@@ -573,13 +614,13 @@ export default function StudentsDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Turma Inicial
                   </label>
                   <select
                     value={classId}
                     onChange={(e) => setClassId(e.target.value)}
-                    className="input-pitch w-full"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                   >
                     {classes.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -590,20 +631,20 @@ export default function StudentsDashboardPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
-                    Observações de Saúde
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
+                    Observações Médicas / Saúde
                   </label>
                   <input
                     type="text"
                     value={healthNotes}
                     onChange={(e) => setHealthNotes(e.target.value)}
-                    className="input-pitch w-full"
-                    placeholder="Alergias, tipo sanguíneo..."
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
+                    placeholder="Tipo sanguíneo, alergias..."
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Nome do Responsável *
                   </label>
                   <input
@@ -611,12 +652,12 @@ export default function StudentsDashboardPage() {
                     required
                     value={guardianName}
                     onChange={(e) => setGuardianName(e.target.value)}
-                    className="input-pitch w-full"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     WhatsApp do Responsável *
                   </label>
                   <input
@@ -625,26 +666,25 @@ export default function StudentsDashboardPage() {
                     value={guardianPhone}
                     onChange={(e) => setGuardianPhone(e.target.value)}
                     placeholder="11999999999"
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
-                    CPF do Responsável *
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
+                    CPF do Responsável
                   </label>
                   <input
                     type="text"
-                    required
                     value={guardianCpf}
                     onChange={(e) => setGuardianCpf(e.target.value)}
                     placeholder="000.000.000-00"
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Dia de Vencimento
                   </label>
                   <select
@@ -652,7 +692,7 @@ export default function StudentsDashboardPage() {
                     onChange={(e) =>
                       setBillingDay(Number(e.target.value) as BillingDay)
                     }
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   >
                     {BILLING_DAYS.map((d) => (
                       <option key={d} value={d}>
@@ -663,20 +703,20 @@ export default function StudentsDashboardPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3">
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="btn-secondary px-4 py-2 text-xs"
+                  className="btn-secondary !text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn-primary px-5 py-2 text-xs"
+                  className="btn-primary !text-xs"
                 >
-                  {saving ? "Salvando..." : "Salvar Aluno"}
+                  {saving ? "Salvando..." : "Salvar Atleta"}
                 </button>
               </div>
             </form>

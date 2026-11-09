@@ -12,7 +12,7 @@ import {
   ExternalLink,
   Copy,
   Check,
-  Sparkles,
+  ShieldCheck,
   X,
 } from "lucide-react";
 import {
@@ -96,12 +96,12 @@ export default function PaymentsCalendarPage() {
   const paymentLookup = useMemo(() => {
     const map = new Map<string, StudentPayment>();
     payments.forEach((p) => {
-      if (p.reference_year === selectedYear) {
+      if (p.reference_year === CURRENT_YEAR) {
         map.set(`${p.student_id}-${p.reference_month}`, p);
       }
     });
     return map;
-  }, [payments, selectedYear]);
+  }, [payments]);
 
   const getStudentFee = (student: Student): number => {
     if (student.class_id && classMap.has(student.class_id)) {
@@ -135,7 +135,6 @@ export default function PaymentsCalendarPage() {
       };
     }
 
-    // Caso ainda não tenha registro salvo naquele mês, calcula status padrão
     const todayStr = new Date().toISOString().split("T")[0];
     const defaultStatus: StudentPaymentStatus =
       dueDate < todayStr ? "overdue" : "pending";
@@ -147,7 +146,6 @@ export default function PaymentsCalendarPage() {
     };
   };
 
-  // Filtra alunos conforme turma e status no mês selecionado
   const filteredStudents = useMemo(() => {
     return students.filter((student) => {
       if (student.status === "inactive") return false;
@@ -163,7 +161,6 @@ export default function PaymentsCalendarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [students, filterClassId, filterStatus, selectedMonth, paymentLookup]);
 
-  // Totais do mês selecionado
   const monthSummary = useMemo(() => {
     let paidCents = 0;
     let pendingCents = 0;
@@ -183,7 +180,6 @@ export default function PaymentsCalendarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredStudents, selectedMonth, paymentLookup]);
 
-  // Gera link Stripe e abre WhatsApp do responsável
   const handleStripeAndWhatsApp = async (
     student: Student,
     month: number,
@@ -195,7 +191,6 @@ export default function PaymentsCalendarPage() {
       const { payment, status, amountCents, dueDate } =
         getEffectivePaymentForMonth(student, month);
 
-      // Garante que o registro exista em student_payments
       const ensured = await ensureOrUpdateStudentPayment({
         paymentId: payment?.id,
         studentId: student.id,
@@ -245,7 +240,7 @@ export default function PaymentsCalendarPage() {
         if (openWhatsApp) {
           const waPhone = formatPhoneWhatsApp(student.guardian_phone);
           const msg = encodeURIComponent(
-            `Olá ${student.guardian_name}! Segue o link da mensalidade de ${MONTH_NAMES_FULL[month - 1]}/${selectedYear} do atleta ${student.full_name} (${formatCurrencyBRL(amountCents)}), com vencimento em ${dueDate.split("-").reverse().join("/")}:\n\n${checkoutUrl}`
+            `Olá ${student.guardian_name}! Segue a cobrança da mensalidade (${MONTH_NAMES_FULL[month - 1]}/${selectedYear}) do atleta ${student.full_name} (${formatCurrencyBRL(amountCents)}), com vencimento em ${dueDate.split("-").reverse().join("/")}:\n\n${checkoutUrl}`
           );
           window.open(`https://wa.me/${waPhone}?text=${msg}`, "_blank");
         }
@@ -288,90 +283,90 @@ export default function PaymentsCalendarPage() {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-2xl font-extrabold text-text-primary flex items-center gap-2.5">
-            <CreditCard size={24} className="text-verde" />
-            Calendário de Mensalidades + Stripe
+          <h1 className="font-[family-name:var(--font-montserrat)] text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
+            <CreditCard size={24} className="text-emerald-600" />
+            Calendário Financeiro & Mensalidades Stripe
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Acompanhe vencimentos nos dias 5, 10, 15 e 20 ou na Matriz Anual
-            (Jan–Dez) e envie links de pagamento Stripe via WhatsApp.
+          <p className="mt-1 text-sm text-slate-600">
+            Acompanhe vencimentos por dia (5, 10, 15, 20) ou na Matriz Anual e
+            envie cobranças Stripe direto no WhatsApp dos pais.
           </p>
         </div>
 
-        {/* Seletor de Visão */}
-        <div className="inline-flex rounded-xl border border-pitch-border bg-pitch-surface p-1">
+        {/* Toggle de Visão */}
+        <div className="inline-flex rounded-lg border border-slate-300 bg-white p-1 shadow-2xs">
           <button
             type="button"
             onClick={() => setViewMode("due_calendar")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
+            className={`inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
               viewMode === "due_calendar"
-                ? "bg-verde text-[#0a0f0b]"
-                : "text-text-secondary hover:text-text-primary"
+                ? "bg-emerald-600 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             <Calendar size={14} />
-            Calendário por Vencimento (5, 10, 15, 20)
+            <span>Por Vencimento (Dias 5, 10, 15, 20)</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode("annual_matrix")}
-            className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
+            className={`inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
               viewMode === "annual_matrix"
-                ? "bg-verde text-[#0a0f0b]"
-                : "text-text-secondary hover:text-text-primary"
+                ? "bg-emerald-600 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             <Grid size={14} />
-            Matriz Anual (Jan a Dez)
+            <span>Matriz Anual (Jan a Dez)</span>
           </button>
         </div>
       </div>
 
-      {/* Resumo Financeiro do Mês + Filtros */}
+      {/* Resumo Financeiro com as cores semânticas */}
       <div className="grid gap-4 lg:grid-cols-4">
-        <div className="card p-4 border-verde/30">
-          <span className="text-xs font-semibold uppercase text-text-muted">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-xs">
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 font-mono">
             Recebido ({MONTH_NAMES_SHORT[selectedMonth - 1]}/{selectedYear})
           </span>
-          <div className="mt-1 font-mono text-2xl font-extrabold text-verde">
+          <div className="mt-1 font-[family-name:var(--font-montserrat)] text-2xl font-black text-emerald-700">
             {formatCurrencyBRL(monthSummary.paidCents)}
           </div>
-          <span className="text-[11px] text-text-secondary">
-            Confirmado via Stripe / Manual
+          <span className="text-[11px] text-emerald-800 font-medium">
+            Confirmado via Webhook / Baixa
           </span>
         </div>
 
-        <div className="card p-4 border-amarelo/30">
-          <span className="text-xs font-semibold uppercase text-text-muted">
-            A Receber / Pendente
+        <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 shadow-xs">
+          <span className="text-xs font-bold uppercase tracking-wider text-amber-800 font-mono">
+            A Receber (Pendente)
           </span>
-          <div className="mt-1 font-mono text-2xl font-extrabold text-amarelo-light">
+          <div className="mt-1 font-[family-name:var(--font-montserrat)] text-2xl font-black text-amber-700">
             {formatCurrencyBRL(monthSummary.pendingCents)}
           </div>
-          <span className="text-[11px] text-text-secondary">
+          <span className="text-[11px] text-amber-800 font-medium">
             Aguardando pagamento do link
           </span>
         </div>
 
-        <div className="card p-4 border-vermelho/30">
-          <span className="text-xs font-semibold uppercase text-text-muted">
-            Em Atraso (Inadimplência)
+        <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 shadow-xs">
+          <span className="text-xs font-bold uppercase tracking-wider text-rose-800 font-mono">
+            Inadimplência / Atraso
           </span>
-          <div className="mt-1 font-mono text-2xl font-extrabold text-vermelho-light">
+          <div className="mt-1 font-[family-name:var(--font-montserrat)] text-2xl font-black text-rose-700">
             {formatCurrencyBRL(monthSummary.overdueCents)}
           </div>
-          <span className="text-[11px] text-text-secondary">
+          <span className="text-[11px] text-rose-800 font-medium">
             Cobrar via botão WhatsApp
           </span>
         </div>
 
-        {/* Filtros rápidos */}
-        <div className="card p-4 space-y-2.5">
+        {/* Filtros Rápidos */}
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="input-pitch w-full py-1.5 text-xs"
+              className="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-900 outline-none focus:border-emerald-500 cursor-pointer"
             >
               {MONTH_NAMES_FULL.map((m, idx) => (
                 <option key={m} value={idx + 1}>
@@ -383,7 +378,7 @@ export default function PaymentsCalendarPage() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="input-pitch w-full py-1.5 text-xs"
+              className="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-900 outline-none focus:border-emerald-500 cursor-pointer"
             >
               <option value="ALL">Todos Status</option>
               <option value="paid">Pago</option>
@@ -395,7 +390,7 @@ export default function PaymentsCalendarPage() {
           <select
             value={filterClassId}
             onChange={(e) => setFilterClassId(e.target.value)}
-            className="input-pitch w-full py-1.5 text-xs"
+            className="h-9 w-full rounded-md border border-slate-300 bg-white px-2.5 text-xs text-slate-900 outline-none focus:border-emerald-500 cursor-pointer"
           >
             <option value="ALL">Todas as Turmas</option>
             {classes.map((c) => (
@@ -407,9 +402,9 @@ export default function PaymentsCalendarPage() {
         </div>
       </div>
 
-      {/* VISÃO 1: CALENDÁRIO POR DATA DE VENCIMENTO (DIAS 5, 10, 15, 20) */}
+      {/* VISÃO 1: CALENDÁRIO POR VENCIMENTO (DIAS 5, 10, 15, 20) */}
       {loading ? (
-        <div className="card p-12 text-center text-sm text-text-muted">
+        <div className="card p-12 text-center text-sm text-slate-500">
           Carregando calendário financeiro...
         </div>
       ) : viewMode === "due_calendar" ? (
@@ -420,30 +415,32 @@ export default function PaymentsCalendarPage() {
             );
 
             return (
-              <div key={bDay} className="card overflow-hidden">
-                <div className="flex items-center justify-between border-b border-pitch-border bg-pitch-bg-alt px-5 py-3.5">
+              <div
+                key={bDay}
+                className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden"
+              >
+                <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3.5">
                   <div className="flex items-center gap-2.5">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-verde/15 font-mono text-sm font-extrabold text-verde">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 font-[family-name:var(--font-montserrat)] text-sm font-extrabold text-white">
                       {String(bDay).padStart(2, "0")}
                     </span>
                     <div>
-                      <h2 className="text-sm font-bold text-text-primary">
-                        Vencimento Dia {bDay} de{" "}
-                        {MONTH_NAMES_FULL[selectedMonth - 1]}
+                      <h2 className="font-[family-name:var(--font-montserrat)] text-sm font-bold text-slate-900">
+                        Vencimento Todo Dia {bDay} de {MONTH_NAMES_FULL[selectedMonth - 1]}
                       </h2>
-                      <p className="text-[11px] text-text-muted">
-                        {dayStudents.length} atleta(s) neste vencimento
+                      <p className="text-[11px] text-slate-500">
+                        {dayStudents.length} atleta(s) vinculados a este dia
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {dayStudents.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-text-muted">
+                  <div className="p-6 text-center text-xs text-slate-400">
                     Nenhum aluno com vencimento no dia {bDay} para este filtro.
                   </div>
                 ) : (
-                  <div className="divide-y divide-pitch-border">
+                  <div className="divide-y divide-slate-100">
                     {dayStudents.map((student) => {
                       const { payment, status, amountCents } =
                         getEffectivePaymentForMonth(student, selectedMonth);
@@ -456,45 +453,45 @@ export default function PaymentsCalendarPage() {
                       return (
                         <div
                           key={student.id}
-                          className="p-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
+                          className="p-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center hover:bg-slate-50/60 transition"
                         >
                           <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-bold text-sm text-text-primary">
+                              <span className="font-[family-name:var(--font-montserrat)] font-bold text-sm text-slate-900">
                                 {student.full_name}
                               </span>
                               {status === "paid" && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-verde/15 px-2.5 py-0.5 text-[11px] font-bold text-verde">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
                                   <CheckCircle2 size={11} />
                                   Pago
                                 </span>
                               )}
                               {status === "pending" && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-amarelo/15 px-2.5 py-0.5 text-[11px] font-bold text-amarelo-light">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-200 px-2.5 py-0.5 text-[11px] font-bold text-amber-700">
                                   <Clock size={11} />
                                   Pendente
                                 </span>
                               )}
                               {status === "overdue" && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-vermelho/15 px-2.5 py-0.5 text-[11px] font-bold text-vermelho-light">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 border border-rose-200 px-2.5 py-0.5 text-[11px] font-bold text-rose-700">
                                   <AlertTriangle size={11} />
                                   Atrasado
                                 </span>
                               )}
                             </div>
 
-                            <div className="text-xs text-text-secondary">
+                            <div className="text-xs text-slate-500">
                               Resp: {student.guardian_name} ·{" "}
-                              <span className="text-text-muted">
+                              <span className="text-slate-600 font-medium">
                                 {cls?.name || "Sem turma"}
                               </span>
                             </div>
-                            <div className="font-mono text-xs font-bold text-verde">
+                            <div className="font-[family-name:var(--font-montserrat)] text-xs font-black text-emerald-700">
                               {formatCurrencyBRL(amountCents)}
                             </div>
                           </div>
 
-                          {/* Ações Stripe / Status */}
+                          {/* Ações Stripe / WhatsApp */}
                           <div className="flex flex-wrap items-center gap-2">
                             {status !== "paid" ? (
                               <>
@@ -508,12 +505,14 @@ export default function PaymentsCalendarPage() {
                                       true
                                     )
                                   }
-                                  className="inline-flex items-center gap-1.5 rounded-lg bg-verde px-3 py-2 text-xs font-bold text-[#0a0f0b] transition hover:bg-verde-light cursor-pointer disabled:opacity-50"
+                                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-500 cursor-pointer disabled:opacity-50 shadow-2xs"
                                 >
                                   <MessageCircle size={14} />
-                                  {isGenerating
-                                    ? "Gerando Stripe..."
-                                    : "Gerar Link Stripe / Enviar WhatsApp"}
+                                  <span>
+                                    {isGenerating
+                                      ? "Gerando Stripe..."
+                                      : "Link Stripe + WhatsApp"}
+                                  </span>
                                 </button>
 
                                 <button
@@ -525,16 +524,16 @@ export default function PaymentsCalendarPage() {
                                       "paid"
                                     )
                                   }
-                                  className="rounded-lg border border-pitch-border bg-pitch-bg-alt px-2.5 py-2 text-xs font-semibold text-text-secondary hover:border-verde hover:text-verde cursor-pointer"
+                                  className="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-700 cursor-pointer"
                                 >
                                   Dar Baixa
                                 </button>
                               </>
                             ) : (
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-mono text-text-muted">
+                                <span className="text-[11px] font-mono text-emerald-700 font-semibold">
                                   {payment?.paid_at
-                                    ? `Pago em ${new Date(payment.paid_at).toLocaleDateString("pt-BR")}`
+                                    ? `Quitado em ${new Date(payment.paid_at).toLocaleDateString("pt-BR")}`
                                     : "Quitado"}
                                 </span>
                                 <button
@@ -546,7 +545,7 @@ export default function PaymentsCalendarPage() {
                                       "pending"
                                     )
                                   }
-                                  className="text-[11px] text-text-muted underline hover:text-text-primary cursor-pointer"
+                                  className="text-[11px] text-slate-400 underline hover:text-slate-700 cursor-pointer"
                                 >
                                   Reabrir
                                 </button>
@@ -563,28 +562,29 @@ export default function PaymentsCalendarPage() {
           })}
         </div>
       ) : (
-        /* VISÃO 2: MATRIZ ANUAL DE PAGAMENTOS (JAN A DEZ) */
-        <div className="card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-pitch-border bg-pitch-bg-alt px-5 py-3.5">
+        /* VISÃO 2: MATRIZ ANUAL (JAN A DEZ) */
+        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3.5">
             <div>
-              <h2 className="text-sm font-bold text-text-primary">
+              <h2 className="font-[family-name:var(--font-montserrat)] text-sm font-bold text-slate-900">
                 Matriz Anual de Mensalidades ({selectedYear})
               </h2>
-              <p className="text-xs text-text-muted">
-                Clique em qualquer mês para gerar cobrança Stripe, enviar no
-                WhatsApp ou atualizar status.
+              <p className="text-xs text-slate-500">
+                Clique na célula para gerar cobrança Stripe, enviar WhatsApp ou
+                atualizar status.
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="inline-flex items-center gap-1 text-verde font-semibold">
-                <span className="h-2.5 w-2.5 rounded-full bg-verde" /> Pago
+              <span className="inline-flex items-center gap-1.5 text-emerald-700 font-bold">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />{" "}
+                Pago
               </span>
-              <span className="inline-flex items-center gap-1 text-amarelo-light font-semibold">
-                <span className="h-2.5 w-2.5 rounded-full bg-amarelo" />{" "}
+              <span className="inline-flex items-center gap-1.5 text-amber-700 font-bold">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />{" "}
                 Pendente
               </span>
-              <span className="inline-flex items-center gap-1 text-vermelho-light font-semibold">
-                <span className="h-2.5 w-2.5 rounded-full bg-vermelho" />{" "}
+              <span className="inline-flex items-center gap-1.5 text-rose-700 font-bold">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />{" "}
                 Atrasado
               </span>
             </div>
@@ -593,18 +593,20 @@ export default function PaymentsCalendarPage() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-pitch-border bg-pitch-bg-alt/60 text-text-muted">
-                  <th className="sticky left-0 z-10 bg-pitch-bg-alt px-4 py-3 font-bold">
+                <tr className="border-b border-slate-200 bg-slate-100/70 text-slate-600">
+                  <th className="sticky left-0 z-10 bg-slate-100 px-4 py-3 font-bold font-mono">
                     Atleta / Turma
                   </th>
-                  <th className="px-3 py-3 font-bold text-center">Venc.</th>
+                  <th className="px-3 py-3 font-bold text-center font-mono">
+                    Venc.
+                  </th>
                   {MONTH_NAMES_SHORT.map((mName, idx) => (
                     <th
                       key={mName}
-                      className={`px-2.5 py-3 text-center font-mono font-bold ${
+                      className={`px-2 py-3 text-center font-mono font-bold ${
                         idx + 1 === CURRENT_MONTH
-                          ? "text-verde bg-verde/5"
-                          : "text-text-secondary"
+                          ? "text-emerald-700 bg-emerald-50"
+                          : "text-slate-600"
                       }`}
                     >
                       {mName}
@@ -612,27 +614,24 @@ export default function PaymentsCalendarPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-pitch-border">
+              <tbody className="divide-y divide-slate-100">
                 {filteredStudents.map((student) => {
                   const cls = student.class_id
                     ? classMap.get(student.class_id)
                     : null;
 
                   return (
-                    <tr
-                      key={student.id}
-                      className="hover:bg-pitch-surface-hover/60"
-                    >
-                      <td className="sticky left-0 z-10 bg-pitch-surface px-4 py-3">
-                        <div className="font-bold text-text-primary">
+                    <tr key={student.id} className="hover:bg-slate-50/80">
+                      <td className="sticky left-0 z-10 bg-white px-4 py-3 border-r border-slate-100">
+                        <div className="font-[family-name:var(--font-montserrat)] font-bold text-slate-900">
                           {student.full_name}
                         </div>
-                        <div className="text-[11px] text-text-muted">
+                        <div className="text-[11px] text-slate-500">
                           {cls?.name || "Sem turma"} ·{" "}
                           {formatCurrencyBRL(getStudentFee(student))}
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-center font-mono font-bold text-text-secondary">
+                      <td className="px-3 py-3 text-center font-mono font-bold text-slate-700">
                         Dia {student.billing_day}
                       </td>
                       {MONTH_NAMES_SHORT.map((_, idx) => {
@@ -643,7 +642,7 @@ export default function PaymentsCalendarPage() {
                         );
 
                         return (
-                          <td key={m} className="px-1.5 py-2.5 text-center">
+                          <td key={m} className="px-1.5 py-2 text-center">
                             <button
                               type="button"
                               onClick={() =>
@@ -653,12 +652,12 @@ export default function PaymentsCalendarPage() {
                                   payment,
                                 })
                               }
-                              className={`w-full rounded-md px-2 py-1.5 font-mono text-[11px] font-bold transition cursor-pointer ${
+                              className={`w-full rounded-md px-1.5 py-1.5 font-mono text-[11px] font-bold transition cursor-pointer border ${
                                 status === "paid"
-                                  ? "bg-verde/15 text-verde border border-verde/30 hover:bg-verde/25"
+                                  ? "bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200"
                                   : status === "overdue"
-                                    ? "bg-vermelho/15 text-vermelho-light border border-vermelho/30 hover:bg-vermelho/25"
-                                    : "bg-amarelo/15 text-amarelo-light border border-amarelo/30 hover:bg-amarelo/25"
+                                    ? "bg-rose-100 text-rose-800 border-rose-300 hover:bg-rose-200"
+                                    : "bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200"
                               }`}
                             >
                               {status === "paid"
@@ -679,23 +678,23 @@ export default function PaymentsCalendarPage() {
         </div>
       )}
 
-      {/* Modal de Detalhe da Mensalidade (ao clicar na célula da Matriz Anual) */}
+      {/* Modal Detalhe Mensalidade */}
       {activeCellModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-          <div className="card w-full max-w-md p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-pitch-border pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <span className="text-xs font-bold uppercase text-verde">
+                <span className="font-mono text-xs font-bold uppercase text-emerald-600">
                   {MONTH_NAMES_FULL[activeCellModal.month - 1]} / {selectedYear}
                 </span>
-                <h3 className="text-lg font-bold text-text-primary">
+                <h3 className="font-[family-name:var(--font-montserrat)] text-lg font-bold text-slate-900">
                   {activeCellModal.student.full_name}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setActiveCellModal(null)}
-                className="rounded-lg p-1 text-text-muted hover:text-text-primary cursor-pointer"
+                className="rounded-lg p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -711,29 +710,37 @@ export default function PaymentsCalendarPage() {
 
               return (
                 <div className="space-y-4">
-                  <div className="rounded-xl border border-pitch-border bg-pitch-bg-alt p-4 space-y-2 text-xs">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-text-muted">Responsável:</span>
-                      <span className="font-semibold text-text-primary">
+                      <span className="text-slate-500">Responsável:</span>
+                      <span className="font-semibold text-slate-900">
                         {activeCellModal.student.guardian_name} (
                         {activeCellModal.student.guardian_phone})
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-text-muted">Data Vencimento:</span>
-                      <span className="font-mono text-text-primary">
+                      <span className="text-slate-500">Vencimento:</span>
+                      <span className="font-mono font-semibold text-slate-900">
                         {dueDate.split("-").reverse().join("/")}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-text-muted">Valor:</span>
-                      <span className="font-mono font-bold text-verde">
+                      <span className="text-slate-500">Valor Mensal:</span>
+                      <span className="font-[family-name:var(--font-montserrat)] font-black text-emerald-700">
                         {formatCurrencyBRL(amountCents)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-text-muted">Status Atual:</span>
-                      <span className="font-bold uppercase text-text-primary">
+                      <span className="text-slate-500">Status Atual:</span>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 font-bold uppercase text-[11px] ${
+                          status === "paid"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : status === "overdue"
+                              ? "bg-rose-100 text-rose-800"
+                              : "bg-amber-100 text-amber-800"
+                        }`}
+                      >
                         {status === "paid"
                           ? "Pago"
                           : status === "overdue"
@@ -755,12 +762,14 @@ export default function PaymentsCalendarPage() {
                           true
                         )
                       }
-                      className="btn-primary w-full py-2.5 text-xs"
+                      className="btn-primary w-full !text-xs !py-2.5 shadow-2xs"
                     >
                       <MessageCircle size={15} />
-                      {generatingKey === key
-                        ? "Gerando Checkout Stripe..."
-                        : "Gerar Link Stripe & Enviar no WhatsApp"}
+                      <span>
+                        {generatingKey === key
+                          ? "Gerando Checkout Stripe..."
+                          : "Gerar Link Stripe & Abrir WhatsApp"}
+                      </span>
                     </button>
 
                     <button
@@ -773,17 +782,17 @@ export default function PaymentsCalendarPage() {
                           false
                         )
                       }
-                      className="btn-secondary w-full py-2 text-xs"
+                      className="btn-secondary w-full !text-xs !py-2"
                     >
                       {copiedId === key ? (
                         <>
-                          <Check size={14} className="text-verde" />
-                          Link Stripe Copiado!
+                          <Check size={14} className="text-emerald-600" />
+                          <span>Link Stripe Copiado!</span>
                         </>
                       ) : (
                         <>
                           <Copy size={14} />
-                          Apenas Gerar e Copiar Link Stripe
+                          <span>Apenas Copiar Link Stripe</span>
                         </>
                       )}
                     </button>
@@ -793,16 +802,17 @@ export default function PaymentsCalendarPage() {
                         href={payment.stripe_checkout_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-1.5 text-xs font-semibold text-verde hover:underline pt-1"
+                        className="flex items-center justify-center gap-1.5 text-xs font-semibold text-emerald-600 hover:underline pt-1"
                       >
-                        Abrir Link Stripe Gerado <ExternalLink size={12} />
+                        <span>Abrir Link Stripe Gerado</span>
+                        <ExternalLink size={12} />
                       </a>
                     )}
                   </div>
 
-                  {/* Alterar Status Manualmente */}
-                  <div className="border-t border-pitch-border pt-3">
-                    <span className="mb-2 block text-[11px] font-semibold uppercase text-text-muted">
+                  {/* Alterar Status */}
+                  <div className="border-t border-slate-100 pt-3">
+                    <span className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono">
                       Alterar Status Manualmente:
                     </span>
                     <div className="grid grid-cols-3 gap-2">
@@ -815,10 +825,10 @@ export default function PaymentsCalendarPage() {
                             "paid"
                           )
                         }
-                        className={`rounded-lg border py-2 text-xs font-bold cursor-pointer ${
+                        className={`rounded-lg border py-2 text-xs font-bold cursor-pointer transition ${
                           status === "paid"
-                            ? "border-verde bg-verde/20 text-verde"
-                            : "border-pitch-border text-text-secondary"
+                            ? "border-emerald-600 bg-emerald-100 text-emerald-800"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         Pago
@@ -832,10 +842,10 @@ export default function PaymentsCalendarPage() {
                             "pending"
                           )
                         }
-                        className={`rounded-lg border py-2 text-xs font-bold cursor-pointer ${
+                        className={`rounded-lg border py-2 text-xs font-bold cursor-pointer transition ${
                           status === "pending"
-                            ? "border-amarelo bg-amarelo/20 text-amarelo-light"
-                            : "border-pitch-border text-text-secondary"
+                            ? "border-amber-500 bg-amber-100 text-amber-800"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         Pendente
@@ -849,10 +859,10 @@ export default function PaymentsCalendarPage() {
                             "overdue"
                           )
                         }
-                        className={`rounded-lg border py-2 text-xs font-bold cursor-pointer ${
+                        className={`rounded-lg border py-2 text-xs font-bold cursor-pointer transition ${
                           status === "overdue"
-                            ? "border-vermelho bg-vermelho/20 text-vermelho-light"
-                            : "border-pitch-border text-text-secondary"
+                            ? "border-rose-500 bg-rose-100 text-rose-800"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         Atrasado
@@ -866,17 +876,17 @@ export default function PaymentsCalendarPage() {
         </div>
       )}
 
-      {/* Rodapé informativo do Webhook */}
-      <div className="card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-pitch-border bg-pitch-bg-alt">
-        <div className="flex items-center gap-2.5 text-xs text-text-secondary">
-          <Sparkles size={16} className="text-verde shrink-0" />
+      {/* Webhook Info Card */}
+      <div className="rounded-xl border border-slate-200 bg-white p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+        <div className="flex items-center gap-2.5 text-xs text-slate-600">
+          <ShieldCheck size={18} className="text-emerald-600 shrink-0" />
           <span>
-            Webhook configurado em{" "}
-            <code className="rounded bg-pitch-surface px-1.5 py-0.5 font-mono text-verde">
+            Webhook ativo em{" "}
+            <code className="rounded bg-slate-100 border border-slate-200 px-1.5 py-0.5 font-mono text-emerald-700 font-bold">
               POST /api/stripe/webhook
             </code>{" "}
             escutando <code>checkout.session.completed</code> para baixa
-            automática em <code>student_payments</code>.
+            automática.
           </span>
         </div>
       </div>

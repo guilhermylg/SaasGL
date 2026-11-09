@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  GraduationCap,
+  Trophy,
   Plus,
   Calendar,
   Clock,
@@ -11,6 +11,7 @@ import {
   Trash2,
   CalendarClock,
   X,
+  Lock,
 } from "lucide-react";
 import {
   SchoolClass,
@@ -114,35 +115,35 @@ export default function ClassesDashboardPage() {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-extrabold text-text-primary flex items-center gap-2.5">
-            <GraduationCap size={24} className="text-verde" />
+          <h1 className="font-[family-name:var(--font-montserrat)] text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
+            <Trophy size={24} className="text-emerald-600" />
             Turmas & Categorias da Escolinha
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Os dias e horários das turmas bloqueiam automaticamente a{" "}
+          <p className="mt-1 text-sm text-slate-600">
+            Os horários das turmas bloqueiam automaticamente a{" "}
             <Link
               href="/dashboard/court"
-              className="text-verde underline hover:text-verde-light"
+              className="font-semibold text-emerald-600 underline hover:text-emerald-700"
             >
-              Agenda de Locação da Quadra
+              Agenda da Quadra
             </Link>{" "}
-            e alimentam a triagem automática em <code>/matricula</code>.
+            (impedindo conflito com locações avulsas) e alimentam a triagem em <code>/matricula</code>.
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => setShowModal(true)}
-          className="btn-primary px-5 py-2.5 text-sm"
+          className="btn-primary !text-xs sm:!text-sm"
         >
           <Plus size={16} />
-          Nova Turma / Categoria
+          <span>Nova Turma / Categoria</span>
         </button>
       </div>
 
       {/* Grid de Turmas */}
       {loading ? (
-        <div className="card p-12 text-center text-sm text-text-muted">
+        <div className="card p-12 text-center text-sm text-slate-500">
           Carregando turmas e categorias...
         </div>
       ) : (
@@ -157,80 +158,84 @@ export default function ClassesDashboardPage() {
             return (
               <div
                 key={cls.id}
-                className="card p-6 flex flex-col justify-between space-y-5"
+                className="rounded-xl border border-slate-200 bg-white shadow-xs hover:shadow-md transition-all p-6 flex flex-col justify-between space-y-5"
               >
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <span className="inline-block rounded bg-verde/15 px-2.5 py-0.5 font-mono text-xs font-bold text-verde mb-1.5">
+                      <span className="inline-block rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 font-mono text-xs font-bold mb-2">
                         {cls.min_age} a {cls.max_age} anos
                       </span>
-                      <h2 className="text-lg font-bold text-text-primary">
+                      <h2 className="font-[family-name:var(--font-montserrat)] text-lg font-bold text-slate-900 leading-tight">
                         {cls.name}
                       </h2>
-                      <p className="text-xs text-text-secondary mt-0.5">
-                        {cls.coach_name}
+                      <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                        Professor: {cls.coach_name}
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <div className="font-mono text-lg font-extrabold text-verde">
+                      <div className="font-[family-name:var(--font-montserrat)] text-xl font-black text-emerald-700">
                         {formatCurrencyBRL(cls.monthly_fee_cents)}
                       </div>
-                      <span className="text-[11px] text-text-muted">
+                      <span className="text-[11px] text-slate-400 font-medium">
                         mensalidade
                       </span>
                     </div>
                   </div>
 
-                  {/* Dias e Horário */}
-                  <div className="rounded-xl border border-pitch-border bg-pitch-bg-alt p-3 space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-text-primary font-medium">
-                      <Calendar size={14} className="text-amarelo shrink-0" />
+                  {/* Dias e Horário com Badge de Bloqueio da Quadra */}
+                  <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3.5 space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-indigo-900 font-semibold">
+                      <Calendar size={14} className="text-indigo-600 shrink-0" />
                       <span>{cls.days_of_week.join(" · ")}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-text-secondary font-mono">
-                      <Clock size={14} className="text-verde shrink-0" />
-                      <span>
+                    <div className="flex items-center justify-between gap-2 text-indigo-700 font-mono">
+                      <span className="flex items-center gap-1.5 font-semibold">
+                        <Clock size={14} className="text-indigo-600 shrink-0" />
                         {formatTimeShort(cls.start_time)} às{" "}
-                        {formatTimeShort(cls.end_time)} (Bloqueia Quadra)
+                        {formatTimeShort(cls.end_time)}
+                      </span>
+                      <span className="inline-flex items-center gap-1 font-sans text-[10px] font-bold uppercase tracking-wider bg-indigo-100 border border-indigo-200 text-indigo-800 px-1.5 py-0.5 rounded">
+                        <Lock size={10} />
+                        Trava Quadra
                       </span>
                     </div>
                   </div>
 
-                  {/* Barra de vagas */}
+                  {/* Barra de Ocupação */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center gap-1.5 text-text-secondary">
-                        <Users size={13} className="text-verde" />
+                      <span className="flex items-center gap-1.5 text-slate-600 font-medium">
+                        <Users size={14} className="text-emerald-600" />
                         Ocupação da Turma
                       </span>
-                      <span className="font-mono font-bold text-text-primary">
-                        {enrolled}/{cls.max_students} atletas ({occupancyPct}%)
+                      <span className="font-mono font-bold text-slate-900">
+                        {enrolled}/{cls.max_students} ({occupancyPct}%)
                       </span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-pitch-bg-alt">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
                       <div
-                        className="h-full rounded-full bg-verde transition-all"
+                        className="h-full rounded-full bg-emerald-600 transition-all duration-300"
                         style={{ width: `${occupancyPct}%` }}
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-pitch-border pt-3">
+                <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                   <Link
                     href="/dashboard/court"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-verde"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-emerald-600 transition"
                   >
                     <CalendarClock size={14} />
-                    Ver na Grade da Quadra
+                    <span>Ver na Grade da Quadra</span>
                   </Link>
                   <button
                     type="button"
                     onClick={() => handleDelete(cls.id)}
                     title="Remover turma"
-                    className="rounded-lg p-1.5 text-text-muted hover:bg-vermelho/15 hover:text-vermelho-light transition cursor-pointer"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition cursor-pointer"
                   >
                     <Trash2 size={15} />
                   </button>
@@ -243,16 +248,16 @@ export default function ClassesDashboardPage() {
 
       {/* Modal Nova Turma */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
-          <div className="card max-h-[90vh] w-full max-w-lg overflow-y-auto p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-pitch-border pb-3">
-              <h2 className="text-lg font-bold text-text-primary">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="font-[family-name:var(--font-montserrat)] text-lg font-bold text-slate-900">
                 Criar Nova Turma da Escolinha
               </h2>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="rounded-lg p-1 text-text-muted hover:text-text-primary cursor-pointer"
+                className="rounded-lg p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -260,7 +265,7 @@ export default function ClassesDashboardPage() {
 
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                <label className="mb-1 block text-xs font-bold text-slate-700">
                   Nome da Turma / Categoria *
                 </label>
                 <input
@@ -268,14 +273,14 @@ export default function ClassesDashboardPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Ex: Sub-11 Tarde Competição"
-                  className="input-pitch w-full"
+                  placeholder="Ex: Sub-11 Tarde Formação"
+                  className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Idade Mínima (anos) *
                   </label>
                   <input
@@ -285,11 +290,11 @@ export default function ClassesDashboardPage() {
                     required
                     value={minAge}
                     onChange={(e) => setMinAge(Number(e.target.value))}
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Idade Máxima (anos) *
                   </label>
                   <input
@@ -299,13 +304,13 @@ export default function ClassesDashboardPage() {
                     required
                     value={maxAge}
                     onChange={(e) => setMaxAge(Number(e.target.value))}
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                <label className="mb-1 block text-xs font-bold text-slate-700">
                   Professor / Treinador Responsável *
                 </label>
                 <input
@@ -314,12 +319,12 @@ export default function ClassesDashboardPage() {
                   value={coachName}
                   onChange={(e) => setCoachName(e.target.value)}
                   placeholder="Ex: Prof. Marcos Vinícius"
-                  className="input-pitch w-full"
+                  className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-text-secondary">
+                <label className="mb-1.5 block text-xs font-bold text-slate-700">
                   Dias de Treino na Semana *
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -332,8 +337,8 @@ export default function ClassesDashboardPage() {
                         onClick={() => toggleDay(day)}
                         className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
                           active
-                            ? "border-verde bg-verde/15 text-verde"
-                            : "border-pitch-border bg-pitch-bg-alt text-text-secondary"
+                            ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-2xs"
+                            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                         }`}
                       >
                         {day}
@@ -345,7 +350,7 @@ export default function ClassesDashboardPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Horário de Início *
                   </label>
                   <input
@@ -353,11 +358,11 @@ export default function ClassesDashboardPage() {
                     required
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Horário de Término *
                   </label>
                   <input
@@ -365,14 +370,14 @@ export default function ClassesDashboardPage() {
                     required
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
                     Mensalidade (R$) *
                   </label>
                   <input
@@ -382,12 +387,12 @@ export default function ClassesDashboardPage() {
                     required
                     value={monthlyFeeReais}
                     onChange={(e) => setMonthlyFeeReais(e.target.value)}
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-text-secondary">
-                    Limite de Alunos *
+                  <label className="mb-1 block text-xs font-bold text-slate-700">
+                    Vagas Máximas *
                   </label>
                   <input
                     type="number"
@@ -396,23 +401,23 @@ export default function ClassesDashboardPage() {
                     required
                     value={maxStudents}
                     onChange={(e) => setMaxStudents(Number(e.target.value))}
-                    className="input-pitch w-full font-mono"
+                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 font-mono outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3">
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="btn-secondary px-4 py-2 text-xs"
+                  className="btn-secondary !text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn-primary px-5 py-2 text-xs"
+                  className="btn-primary !text-xs"
                 >
                   {saving ? "Salvando..." : "Criar Turma"}
                 </button>

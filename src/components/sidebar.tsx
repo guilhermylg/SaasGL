@@ -6,42 +6,28 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  GraduationCap,
+  Trophy,
   CreditCard,
   CalendarClock,
-  ExternalLink,
+  ArrowUpRight,
   Copy,
   Check,
   ShieldCheck,
 } from "lucide-react";
+import { Logo } from "@/components/logo";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
-const navItems = [
-  {
-    href: "/dashboard",
-    label: "Visão Geral",
-    icon: LayoutDashboard,
-  },
-  {
-    href: "/dashboard/students",
-    label: "Alunos",
-    icon: Users,
-  },
-  {
-    href: "/dashboard/classes",
-    label: "Turmas & Categorias",
-    icon: GraduationCap,
-  },
-  {
-    href: "/dashboard/payments",
-    label: "Calendário de Pagamentos",
-    icon: CreditCard,
-  },
-  {
-    href: "/dashboard/court",
-    label: "Agenda da Quadra",
-    icon: CalendarClock,
-  },
+export const navItems = [
+  { href: "/dashboard", label: "Visão Geral", icon: LayoutDashboard },
+  { href: "/dashboard/students", label: "Alunos", icon: Users },
+  { href: "/dashboard/classes", label: "Turmas & Categorias", icon: Trophy },
+  { href: "/dashboard/payments", label: "Calendário Financeiro", icon: CreditCard },
+  { href: "/dashboard/court", label: "Agenda da Quadra", icon: CalendarClock },
 ];
+
+export function isNavActive(pathname: string, href: string) {
+  return pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+}
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -52,110 +38,105 @@ export function Sidebar() {
       typeof window !== "undefined"
         ? window.location.origin
         : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const url = `${origin}/matricula`;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(`${origin}/matricula`);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setTimeout(() => setCopied(false), 2200);
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-30 hidden h-screen w-64 flex-col border-r border-pitch-border bg-pitch-bg-alt lg:flex">
-      {/* Logo */}
-      <div className="flex h-16 items-center justify-between border-b border-pitch-border px-6">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-verde/15 text-verde font-mono font-bold text-sm">
-            SP
-          </div>
-          <div>
-            <span className="text-lg font-extrabold tracking-tight text-text-primary">
-              Stat<span className="text-verde">Pitch</span>
-            </span>
-            <span className="block text-[10px] font-medium uppercase tracking-wider text-text-muted">
-              Escolinha & Quadra
-            </span>
-          </div>
-        </Link>
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-slate-900 border-r border-slate-800 lg:flex">
+      {/* Top Brand */}
+      <div className="flex h-16 items-center px-6 border-b border-slate-800">
+        <Logo href="/dashboard" subtitle="Escolinha & Quadra" inverted />
       </div>
 
-      {/* Main Nav */}
+      {/* Nav List */}
       <nav className="flex-1 overflow-y-auto px-3 py-5">
-        <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-          Gestão Esportiva
+        <div className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+          Menu de Gestão
         </div>
         <ul className="space-y-1">
           {navItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
-
+            const active = isNavActive(pathname, item.href);
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-verde/15 text-verde border border-verde/30"
-                      : "text-text-secondary hover:bg-pitch-surface hover:text-text-primary"
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                    active
+                      ? "bg-emerald-600 text-white font-semibold shadow-sm shadow-emerald-900/50"
+                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
                   }`}
                 >
-                  <item.icon size={18} />
-                  {item.label}
+                  <item.icon
+                    size={18}
+                    className={active ? "text-white" : "text-slate-400"}
+                  />
+                  <span>{item.label}</span>
                 </Link>
               </li>
             );
           })}
         </ul>
 
-        {/* Atalho Link Público de Matrícula */}
+        {/* Link Público de Matrícula (Card Prominente) */}
         <div className="mt-8 px-1">
-          <div className="rounded-xl border border-pitch-border bg-pitch-surface p-3.5">
+          <div className="rounded-xl border border-slate-800 bg-slate-800/60 p-4">
             <div className="mb-1.5 flex items-center justify-between">
-              <span className="text-xs font-bold text-verde">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-emerald-400">
                 Link de Matrícula
               </span>
-              <span className="rounded bg-verde/15 px-1.5 py-0.5 text-[10px] font-semibold text-verde">
-                Público
+              <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                WhatsApp
               </span>
             </div>
-            <p className="mb-3 text-xs leading-relaxed text-text-secondary">
-              Envie no WhatsApp dos pais para cadastro de atletas + 1ª cobrança Stripe.
+            <p className="text-xs text-slate-300 leading-relaxed mb-3">
+              Envie aos pais para inscrição rápida sem login + 1ª mensalidade via Stripe.
             </p>
             <div className="flex flex-col gap-2">
               <button
                 type="button"
                 onClick={handleCopyEnrollmentLink}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-verde px-3 py-2 text-xs font-bold text-[#0a0f0b] transition hover:bg-verde-light cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-500 active:scale-95 cursor-pointer shadow-xs"
               >
                 {copied ? (
                   <>
                     <Check size={14} />
-                    Link Copiado!
+                    <span>Link Copiado!</span>
                   </>
                 ) : (
                   <>
                     <Copy size={14} />
-                    Copiar Link (/matricula)
+                    <span>Copiar Link (/matricula)</span>
                   </>
                 )}
               </button>
               <Link
                 href="/matricula"
                 target="_blank"
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-pitch-border py-1.5 text-xs font-medium text-text-secondary transition hover:border-pitch-border-hover hover:text-text-primary"
+                className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-700 hover:text-white"
               >
-                Abrir Formulário
-                <ExternalLink size={12} />
+                <span>Abrir Formulário</span>
+                <ArrowUpRight size={13} />
               </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Footer */}
-      <div className="border-t border-pitch-border p-4">
-        <div className="flex items-center gap-2.5 text-xs text-text-muted">
-          <ShieldCheck size={16} className="text-verde shrink-0" />
-          <span className="truncate">Integrado a Supabase + Stripe</span>
+      {/* Footer Status */}
+      <div className="border-t border-slate-800 p-4">
+        <div className="flex items-center justify-between text-xs text-slate-400">
+          <span className="flex items-center gap-2">
+            <ShieldCheck size={15} className="text-emerald-500" />
+            <span>Supabase + Stripe</span>
+          </span>
+          <span
+            className={`h-2 w-2 rounded-full ${
+              isSupabaseConfigured ? "bg-emerald-500" : "bg-amber-400"
+            }`}
+            title={isSupabaseConfigured ? "Conectado" : "Modo Local"}
+          />
         </div>
       </div>
     </aside>
