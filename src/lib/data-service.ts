@@ -131,7 +131,7 @@ export async function fetchStudents(): Promise<Student[]> {
 }
 
 export async function createStudentEnrollment(
-  studentInput: Omit<Student, "id" | "created_at" | "stripe_customer_id" | "school_class">,
+  studentInput: Omit<Student, "id" | "created_at" | "school_class">,
   monthlyFeeCents: number
 ): Promise<{ student: Student; payment: StudentPayment }> {
   const now = new Date();
@@ -143,12 +143,7 @@ export async function createStudentEnrollment(
   if (isSupabaseConfigured) {
     const { data: studentData, error: studentError } = await supabase
       .from("students")
-      .insert([
-        {
-          ...studentInput,
-          stripe_customer_id: null,
-        },
-      ])
+      .insert([studentInput])
       .select("*")
       .single();
 
@@ -181,7 +176,6 @@ export async function createStudentEnrollment(
   const newStudent: Student = {
     ...studentInput,
     id: crypto.randomUUID(),
-    stripe_customer_id: null,
     created_at: now.toISOString(),
   };
 
@@ -193,8 +187,7 @@ export async function createStudentEnrollment(
     due_date: dueDate,
     amount_cents: monthlyFeeCents,
     status: "pending",
-    stripe_checkout_url: null,
-    stripe_payment_intent_id: null,
+    payment_method: null,
     paid_at: null,
     created_at: now.toISOString(),
   };
@@ -232,7 +225,7 @@ export async function updateStudentStatusOrClass(
 }
 
 // ============================================================
-// 3. STUDENT PAYMENTS (Calendário de Mensalidades)
+// 3. STUDENT PAYMENTS (Conciliação Bancária Manual & Mensalidades)
 // ============================================================
 export async function fetchStudentPayments(
   year?: number
@@ -265,7 +258,7 @@ export async function ensureOrUpdateStudentPayment(params: {
   dueDate: string;
   amountCents: number;
   status: StudentPaymentStatus;
-  stripeCheckoutUrl?: string | null;
+  paymentMethod?: string | null;
 }): Promise<StudentPayment> {
   const nowIso = new Date().toISOString();
 
@@ -274,11 +267,14 @@ export async function ensureOrUpdateStudentPayment(params: {
       const updatePayload: Record<string, unknown> = {
         status: params.status,
       };
-      if (params.stripeCheckoutUrl !== undefined) {
-        updatePayload.stripe_checkout_url = params.stripeCheckoutUrl;
-      }
       if (params.status === "paid") {
         updatePayload.paid_at = nowIso;
+        await supabase
+          .from("students")
+          .update({ status: "active" })
+          .eq("id", params.studentId);
+      } else {
+        updatePayload.paid_at = null;
       }
       const { data, error } = await supabase
         .from("student_payments")
@@ -295,7 +291,6 @@ export async function ensureOrUpdateStudentPayment(params: {
         due_date: params.dueDate,
         amount_cents: params.amountCents,
         status: params.status,
-        stripe_checkout_url: params.stripeCheckoutUrl ?? null,
         paid_at: params.status === "paid" ? nowIso : null,
       };
       const { data, error } = await supabase
@@ -326,10 +321,10 @@ export async function ensureOrUpdateStudentPayment(params: {
     const updatedItem: StudentPayment = {
       ...existing,
       status: params.status,
-      stripe_checkout_url:
-        params.stripeCheckoutUrl !== undefined
-          ? params.stripeCheckoutUrl
-          : existing.stripe_checkout_url,
+      payment_method:
+        params.status === "paid"
+          ? params.paymentMethod || existing.payment_method || "PIX"
+          : null,
       paid_at:
         params.status === "paid"
           ? existing.paid_at || nowIso
@@ -347,8 +342,7 @@ export async function ensureOrUpdateStudentPayment(params: {
       due_date: params.dueDate,
       amount_cents: params.amountCents,
       status: params.status,
-      stripe_checkout_url: params.stripeCheckoutUrl ?? null,
-      stripe_payment_intent_id: null,
+      payment_method: params.status === "paid" ? params.paymentMethod || "PIX" : null,
       paid_at: params.status === "paid" ? nowIso : null,
       created_at: nowIso,
     };
@@ -492,12 +486,22 @@ export async function createCourtBooking(
 
 export async function updateCourtBooking(
   bookingId: string,
-  updates: Partial<Pick<CourtBooking, "payment_status" | "stripe_checkout_url" | "notes">>
+  updates: Partial<Pick<CourtBooking, "payment_status" | "paid_at" | "notes">>
 ): Promise<CourtBooking | null> {
+  const payload = {
+    ...updates,
+    paid_at:
+      updates.payment_status === "paid"
+        ? updates.paid_at || new Date().toISOString()
+        : updates.payment_status
+          ? null
+          : undefined,
+  };
+
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from("court_bookings")
-      .update(updates)
+      .update(payload)
       .eq("id", bookingId)
       .select("*")
       .single();
@@ -513,43 +517,11 @@ export async function updateCourtBooking(
   let updatedBooking: CourtBooking | null = null;
   const next = current.map((b) => {
     if (b.id === bookingId) {
-      updatedBooking = { ...b, ...updates };
+      updatedBooking = { ...b, ...payload };
       return updatedBooking;
     }
     return b;
   });
   writeLocal(STORAGE_KEYS.bookings, next);
   return updatedBooking;
-}
-
-// ============================================================
-// 5. INTEGRAÇÃO STRIPE CHECKOUT (Client Helper)
-// ============================================================
-export interface CreateStripeCheckoutParams {
-  type: "student_payment" | "court_booking";
-  recordId: string;
-  title: string;
-  description: string;
-  amountCents: number;
-  customerEmail?: string;
-  customerName?: string;
-  studentId?: string;
-}
-
-export async function requestStripeCheckoutLink(
-  params: CreateStripeCheckoutParams
-): Promise<{ url: string; simulated: boolean }> {
-  const response = await fetch("/api/stripe/checkout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(params),
-  });
-
-  if (!response.ok) {
-    const errData = await response.json().catch(() => ({}));
-    throw new Error(errData.error || "Falha ao gerar link de pagamento Stripe");
-  }
-
-  const data = await response.json();
-  return { url: data.url, simulated: Boolean(data.simulated) };
 }

@@ -158,7 +158,7 @@ export default function ClassesDashboardPage() {
             return (
               <div
                 key={cls.id}
-                className="rounded-xl border border-slate-200 bg-white shadow-xs hover:shadow-md transition-all p-6 flex flex-col justify-between space-y-5"
+                className="card p-6 flex flex-col justify-between space-y-5"
               >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-2">
@@ -185,7 +185,7 @@ export default function ClassesDashboardPage() {
                   </div>
 
                   {/* Dias e Horário com Badge de Bloqueio da Quadra */}
-                  <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3.5 space-y-2 text-xs">
+                  <div className="rounded-xl border border-indigo-200/70 bg-indigo-50/65 p-3.5 space-y-2 text-xs">
                     <div className="flex items-center gap-2 text-indigo-900 font-semibold">
                       <Calendar size={14} className="text-indigo-600 shrink-0" />
                       <span>{cls.days_of_week.join(" · ")}</span>
@@ -214,16 +214,16 @@ export default function ClassesDashboardPage() {
                         {enrolled}/{cls.max_students} ({occupancyPct}%)
                       </span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200/70">
                       <div
-                        className="h-full rounded-full bg-emerald-600 transition-all duration-300"
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300"
                         style={{ width: `${occupancyPct}%` }}
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                <div className="flex items-center justify-between border-t border-slate-200/60 pt-3">
                   <Link
                     href="/dashboard/quadra"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-emerald-600 transition"
@@ -248,9 +248,9 @@ export default function ClassesDashboardPage() {
 
       {/* Modal Nova Turma */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl liquid-glass p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
               <h2 className="font-[family-name:var(--font-montserrat)] text-lg font-bold text-slate-900">
                 Criar Nova Turma da Escolinha
               </h2>

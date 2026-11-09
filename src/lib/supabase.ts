@@ -25,7 +25,7 @@ export const supabase: SupabaseClient = createClient(
 
 /**
  * Cliente administrativo para uso exclusivo em Route Handlers (Server-side),
- * utilizando SUPABASE_SERVICE_ROLE_KEY quando disponível (ex: Webhook da Stripe).
+ * utilizando SUPABASE_SERVICE_ROLE_KEY quando disponível.
  */
 export function getSupabaseAdmin(): SupabaseClient {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

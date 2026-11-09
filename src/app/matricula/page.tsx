@@ -7,17 +7,17 @@ import {
   HeartPulse,
   Trophy,
   ShieldCheck,
-  CreditCard,
+  QrCode,
   CheckCircle2,
   Copy,
   Check,
-  ExternalLink,
   Calendar,
   Clock,
   Sparkles,
   Phone,
   ArrowLeft,
   MessageCircle,
+  Landmark,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import {
@@ -28,6 +28,7 @@ import {
   PLAYER_POSITIONS,
   DOMINANT_FEET,
   BILLING_DAYS,
+  ARENA_PIX_CONFIG,
   calculateAge,
   getSubCategory,
   formatCurrencyBRL,
@@ -36,8 +37,6 @@ import {
 import {
   fetchClasses,
   createStudentEnrollment,
-  ensureOrUpdateStudentPayment,
-  requestStripeCheckoutLink,
 } from "@/lib/data-service";
 
 export default function MatriculaPublicPage() {
@@ -71,10 +70,8 @@ export default function MatriculaPublicPage() {
     className: string;
     monthlyFeeCents: number;
     billingDay: number;
-    checkoutUrl: string;
-    simulatedStripe: boolean;
   } | null>(null);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedPix, setCopiedPix] = useState(false);
 
   useEffect(() => {
     fetchClasses()
@@ -141,7 +138,7 @@ export default function MatriculaPublicPage() {
     setSubmitting(true);
     try {
       const feeCents = selectedClass?.monthly_fee_cents || 16000;
-      const { student, payment } = await createStudentEnrollment(
+      const { student } = await createStudentEnrollment(
         {
           full_name: fullName.trim(),
           birth_date: birthDate,
@@ -159,37 +156,11 @@ export default function MatriculaPublicPage() {
         feeCents
       );
 
-      const checkout = await requestStripeCheckoutLink({
-        type: "student_payment",
-        recordId: payment.id,
-        studentId: student.id,
-        title: `Matrícula / 1ª Mensalidade — ${student.full_name}`,
-        description: selectedClass
-          ? `Turma: ${selectedClass.name} (${selectedClass.days_of_week.join(", ")} · ${formatTimeShort(selectedClass.start_time)})`
-          : "Mensalidade Escolinha de Futebol",
-        amountCents: feeCents,
-        customerEmail: guardianEmail.trim() || undefined,
-        customerName: guardianName.trim(),
-      });
-
-      await ensureOrUpdateStudentPayment({
-        paymentId: payment.id,
-        studentId: student.id,
-        referenceMonth: payment.reference_month,
-        referenceYear: payment.reference_year,
-        dueDate: payment.due_date,
-        amountCents: payment.amount_cents,
-        status: "pending",
-        stripeCheckoutUrl: checkout.url,
-      });
-
       setEnrollmentResult({
         studentName: student.full_name,
         className: selectedClass?.name || `Triagem ${subCategory}`,
         monthlyFeeCents: feeCents,
         billingDay,
-        checkoutUrl: checkout.url,
-        simulatedStripe: checkout.simulated,
       });
     } catch (err) {
       setErrorMsg(
@@ -202,18 +173,17 @@ export default function MatriculaPublicPage() {
     }
   };
 
-  const handleCopyPaymentLink = () => {
-    if (!enrollmentResult?.checkoutUrl) return;
-    navigator.clipboard.writeText(enrollmentResult.checkoutUrl);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
+  const handleCopyPixKey = () => {
+    navigator.clipboard.writeText(ARENA_PIX_CONFIG.pixKey);
+    setCopiedPix(true);
+    setTimeout(() => setCopiedPix(false), 2500);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 text-slate-900">
+    <div className="min-h-screen py-8 px-4 sm:px-6 text-slate-900">
       <div className="mx-auto max-w-2xl">
-        {/* Top Navbar */}
-        <div className="mb-6 flex items-center justify-between rounded-xl bg-white border border-slate-200 p-4 shadow-xs">
+        {/* Top Navbar Liquid Glass */}
+        <div className="mb-6 flex items-center justify-between rounded-2xl liquid-glass p-4">
           <Logo href="/" subtitle="Matrícula Digital dos Pais" size="sm" />
           <Link
             href="/dashboard"
@@ -224,11 +194,11 @@ export default function MatriculaPublicPage() {
           </Link>
         </div>
 
-        {/* Confirmação Pós-Envio */}
+        {/* Confirmação Pós-Envio com PIX e Conciliação */}
         {enrollmentResult ? (
-          <div className="rounded-xl border border-emerald-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="rounded-2xl liquid-glass p-6 sm:p-8 space-y-6">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-sm">
                 <CheckCircle2 size={36} />
               </div>
               <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 uppercase tracking-wider">
@@ -242,13 +212,13 @@ export default function MatriculaPublicPage() {
                 <strong className="text-slate-900">
                   {enrollmentResult.studentName}
                 </strong>{" "}
-                já estão no sistema. Realize o pagamento da 1ª mensalidade para
-                confirmar a vaga.
+                já estão no sistema. Realize o PIX da 1ª mensalidade e envie o
+                comprovante no WhatsApp para concluirmos a conciliação.
               </p>
             </div>
 
             {/* Resumo */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2.5 text-sm">
+            <div className="rounded-xl border border-slate-200/90 bg-white/80 p-4 space-y-2.5 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-slate-500">Atleta:</span>
                 <span className="font-semibold text-slate-900">
@@ -278,40 +248,63 @@ export default function MatriculaPublicPage() {
               </div>
             </div>
 
-            {/* Botões Stripe & Ação Imediata */}
+            {/* Bloco Liquid Glass de Pagamento PIX Manual */}
+            <div className="liquid-glass-emerald rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white">
+                  <QrCode size={20} />
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+                    Dados para PIX (Conciliação Bancária)
+                  </span>
+                  <p className="text-xs text-slate-600">
+                    {ARENA_PIX_CONFIG.beneficiary} · {ARENA_PIX_CONFIG.bankName}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 rounded-xl bg-white/90 border border-emerald-200 px-3.5 py-2.5">
+                <span className="font-mono text-sm font-bold text-slate-900 truncate">
+                  {ARENA_PIX_CONFIG.pixKey}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyPixKey}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 transition cursor-pointer shrink-0"
+                >
+                  {copiedPix ? (
+                    <>
+                      <Check size={14} />
+                      <span>Copiada!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={14} />
+                      <span>Copiar PIX</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Botão Principal de Envio de Comprovante no WhatsApp */}
             <div className="space-y-3">
               <a
-                href={enrollmentResult.checkoutUrl}
+                href={`https://wa.me/5511999999999?text=${encodeURIComponent(
+                  `Olá! Acabei de realizar a matrícula de *${enrollmentResult.studentName}* na turma *${enrollmentResult.className}* (${formatCurrencyBRL(enrollmentResult.monthlyFeeCents)}). Segue o comprovante PIX para conciliação!`
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary w-full h-14 !text-base shadow-sm"
               >
-                <CreditCard size={18} />
-                <span>Pagar 1ª Mensalidade via Stripe</span>
-                <ExternalLink size={16} />
+                <MessageCircle size={19} />
+                <span>Enviar Comprovante PIX no WhatsApp</span>
               </a>
-
-              <button
-                type="button"
-                onClick={handleCopyPaymentLink}
-                className="btn-secondary w-full h-12 text-sm"
-              >
-                {copiedLink ? (
-                  <>
-                    <Check size={16} className="text-emerald-600" />
-                    <span>Link Stripe Copiado!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={16} />
-                    <span>Copiar Link de Pagamento Stripe</span>
-                  </>
-                )}
-              </button>
             </div>
 
             {/* Guia de Próximos Passos */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
+            <div className="rounded-xl border border-slate-200/90 bg-white/80 p-5 space-y-3">
               <h3 className="font-[family-name:var(--font-montserrat)] text-xs font-bold uppercase tracking-wider text-slate-700">
                 Próximos Passos para o 1º Treino:
               </h3>
@@ -321,7 +314,7 @@ export default function MatriculaPublicPage() {
                     1
                   </span>
                   <span>
-                    Conclua o pagamento da 1ª mensalidade via link seguro Stripe (Cartão ou PIX).
+                    Realize a transferência PIX da 1ª mensalidade utilizando a chave oficial acima.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -329,7 +322,7 @@ export default function MatriculaPublicPage() {
                     2
                   </span>
                   <span>
-                    Apresente o atestado médico de aptidão física na secretaria ou envie pelo WhatsApp.
+                    Envie o comprovante pelo WhatsApp para a coordenação dar baixa na conciliação bancária.
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -341,20 +334,6 @@ export default function MatriculaPublicPage() {
                   </span>
                 </li>
               </ul>
-
-              <div className="pt-2">
-                <a
-                  href={`https://wa.me/5511999999999?text=${encodeURIComponent(
-                    `Olá, acabei de realizar a matrícula de ${enrollmentResult.studentName} na turma ${enrollmentResult.className} e gostaria de confirmar o kit de uniforme!`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 py-2.5 px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition"
-                >
-                  <MessageCircle size={15} className="text-emerald-600" />
-                  <span>Falar com a Coordenação no WhatsApp</span>
-                </a>
-              </div>
             </div>
 
             <div className="pt-2 text-center">
@@ -368,13 +347,13 @@ export default function MatriculaPublicPage() {
             </div>
           </div>
         ) : (
-          /* Formulário Ultra-Limpo */
+          /* Formulário Mobile-First com Liquid Glass */
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Banner de Boas-Vindas */}
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs">
+            <div className="rounded-2xl liquid-glass p-6">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 mb-2">
                 <Sparkles size={13} />
-                Matrícula Digital Online
+                Matrícula Digital Online · ArenaGL
               </div>
               <h1 className="font-[family-name:var(--font-montserrat)] text-2xl font-black text-slate-900 sm:text-3xl tracking-tight">
                 Ficha de Inscrição da Escolinha
@@ -392,8 +371,8 @@ export default function MatriculaPublicPage() {
             )}
 
             {/* SEÇÃO 1: DADOS DO ATLETA */}
-            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <section className="rounded-2xl liquid-glass p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-200/70 pb-3">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 font-[family-name:var(--font-montserrat)] text-xs font-bold text-white">
                     1
@@ -421,7 +400,7 @@ export default function MatriculaPublicPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Ex: Gabriel Martins Oliveira"
-                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white/95 px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
@@ -434,7 +413,7 @@ export default function MatriculaPublicPage() {
                     required
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
-                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white/95 px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
@@ -447,7 +426,7 @@ export default function MatriculaPublicPage() {
                     onChange={(e) =>
                       setPosition(e.target.value as PlayerPosition)
                     }
-                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white/95 px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
                   >
                     {PLAYER_POSITIONS.map((pos) => (
                       <option key={pos} value={pos}>
@@ -467,7 +446,7 @@ export default function MatriculaPublicPage() {
                         key={foot}
                         type="button"
                         onClick={() => setDominantFoot(foot)}
-                        className={`h-11 rounded-lg border text-xs font-bold transition cursor-pointer ${
+                        className={`h-11 rounded-xl border text-xs font-bold transition cursor-pointer ${
                           dominantFoot === foot
                             ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-2xs"
                             : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
@@ -489,15 +468,15 @@ export default function MatriculaPublicPage() {
                     value={healthNotes}
                     onChange={(e) => setHealthNotes(e.target.value)}
                     placeholder="Tipo sanguíneo, alergias a remédios, asma ou restrições (opcional)"
-                    className="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="w-full rounded-xl border border-slate-300 bg-white/95 p-3 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
               </div>
             </section>
 
             {/* SEÇÃO 2: SUGESTÃO AUTOMÁTICA DE TURMA */}
-            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <section className="rounded-2xl liquid-glass p-6 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/70 pb-3">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 font-[family-name:var(--font-montserrat)] text-xs font-bold text-white">
                     2
@@ -541,8 +520,8 @@ export default function MatriculaPublicPage() {
                         onClick={() => setSelectedClassId(cls.id)}
                         className={`rounded-xl border p-4 transition-all cursor-pointer ${
                           isSelected
-                            ? "border-2 border-emerald-600 bg-emerald-50/60 shadow-xs"
-                            : "border-slate-200 bg-white hover:border-slate-300"
+                            ? "border-2 border-emerald-600 bg-emerald-50/70 shadow-xs"
+                            : "border-slate-200 bg-white/90 hover:border-slate-300"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -591,8 +570,8 @@ export default function MatriculaPublicPage() {
             </section>
 
             {/* SEÇÃO 3: DADOS DO RESPONSÁVEL FINANCEIRO */}
-            <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
-              <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+            <section className="rounded-2xl liquid-glass p-6 space-y-5">
+              <div className="flex items-center gap-2.5 border-b border-slate-200/70 pb-3">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 font-[family-name:var(--font-montserrat)] text-xs font-bold text-white">
                   3
                 </span>
@@ -613,7 +592,7 @@ export default function MatriculaPublicPage() {
                     value={guardianName}
                     onChange={(e) => setGuardianName(e.target.value)}
                     placeholder="Ex: Roberto Oliveira"
-                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white/95 px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
@@ -627,7 +606,7 @@ export default function MatriculaPublicPage() {
                     value={guardianCpf}
                     onChange={(e) => setGuardianCpf(e.target.value)}
                     placeholder="000.000.000-00"
-                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 font-mono focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white/95 px-3.5 text-sm text-slate-900 font-mono focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
@@ -642,7 +621,7 @@ export default function MatriculaPublicPage() {
                     value={guardianPhone}
                     onChange={(e) => setGuardianPhone(e.target.value)}
                     placeholder="(11) 99999-9999"
-                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 font-mono focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white/95 px-3.5 text-sm text-slate-900 font-mono focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
@@ -655,7 +634,7 @@ export default function MatriculaPublicPage() {
                     value={guardianEmail}
                     onChange={(e) => setGuardianEmail(e.target.value)}
                     placeholder="responsavel@email.com"
-                    className="h-12 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="h-12 w-full rounded-xl border border-slate-300 bg-white/95 px-3.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none"
                   />
                 </div>
 
@@ -669,7 +648,7 @@ export default function MatriculaPublicPage() {
                         key={day}
                         type="button"
                         onClick={() => setBillingDay(day)}
-                        className={`h-11 rounded-lg border font-mono text-sm font-bold transition cursor-pointer ${
+                        className={`h-11 rounded-xl border font-mono text-sm font-bold transition cursor-pointer ${
                           billingDay === day
                             ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-2xs"
                             : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
@@ -699,13 +678,13 @@ export default function MatriculaPublicPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full h-14 bg-emerald-600 hover:bg-emerald-500 text-white font-[family-name:var(--font-montserrat)] font-bold text-base rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="btn-primary w-full h-14 !text-base shadow-md"
               >
-                <CreditCard size={19} />
+                <Landmark size={19} />
                 <span>
                   {submitting
-                    ? "Processando Matrícula..."
-                    : `Concluir e Pagar Matrícula (${formatCurrencyBRL(
+                    ? "Registrando Matrícula..."
+                    : `Concluir Matrícula & Gerar PIX (${formatCurrencyBRL(
                         selectedClass?.monthly_fee_cents || 16000
                       )})`}
                 </span>

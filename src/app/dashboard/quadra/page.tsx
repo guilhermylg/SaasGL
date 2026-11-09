@@ -19,6 +19,7 @@ import {
   CourtBooking,
   BookingType,
   DayOfWeek,
+  ARENA_PIX_CONFIG,
   formatCurrencyBRL,
   formatPhoneWhatsApp,
   formatTimeShort,
@@ -28,7 +29,6 @@ import {
   fetchCourtBookings,
   createCourtBooking,
   updateCourtBooking,
-  requestStripeCheckoutLink,
 } from "@/lib/data-service";
 
 // Horários das 07:00 às 23:00 (16 faixas de 1h)
@@ -91,15 +91,12 @@ export default function CourtSchedulePage() {
   const [bookingType, setBookingType] = useState<BookingType>("avulso");
   const [priceReais, setPriceReais] = useState("180");
   const [notes, setNotes] = useState("");
-  const [generateStripeOnCreate, setGenerateStripeOnCreate] = useState(true);
+  const [markPaidOnCreate, setMarkPaidOnCreate] = useState(false);
   const [conflictError, setConflictError] = useState<string | null>(null);
   const [savingBooking, setSavingBooking] = useState(false);
 
   // Modal de detalhe de locação existente
   const [selectedBooking, setSelectedBooking] = useState<CourtBooking | null>(
-    null
-  );
-  const [generatingStripeId, setGeneratingStripeId] = useState<string | null>(
     null
   );
 
@@ -230,7 +227,7 @@ export default function CourtSchedulePage() {
         (parseFloat(priceReais.replace(",", ".")) || 180) * 100
       );
 
-      const created = await createCourtBooking({
+      await createCourtBooking({
         client_name: clientName.trim(),
         client_phone: clientPhone.trim(),
         booking_date: bookingModal.date,
@@ -238,25 +235,10 @@ export default function CourtSchedulePage() {
         end_time: bookingModal.endTime,
         booking_type: bookingType,
         price_cents: priceCents,
-        payment_status: "pending",
-        stripe_checkout_url: null,
+        payment_status: markPaidOnCreate ? "paid" : "pending",
+        paid_at: markPaidOnCreate ? new Date().toISOString() : null,
         notes: notes.trim(),
       });
-
-      if (generateStripeOnCreate) {
-        const checkout = await requestStripeCheckoutLink({
-          type: "court_booking",
-          recordId: created.id,
-          title: `Locação de Quadra (${bookingType.toUpperCase()}) — ${created.client_name}`,
-          description: `Data: ${created.booking_date.split("-").reverse().join("/")} das ${formatTimeShort(created.start_time)} às ${formatTimeShort(created.end_time)}`,
-          amountCents: priceCents,
-          customerName: created.client_name,
-        });
-
-        await updateCourtBooking(created.id, {
-          stripe_checkout_url: checkout.url,
-        });
-      }
 
       setBookingModal(null);
       await loadAll();
@@ -269,37 +251,13 @@ export default function CourtSchedulePage() {
     }
   };
 
-  const handleBookingStripeWhatsApp = async (booking: CourtBooking) => {
-    setGeneratingStripeId(booking.id);
-    try {
-      let checkoutUrl = booking.stripe_checkout_url;
-      if (!checkoutUrl) {
-        const res = await requestStripeCheckoutLink({
-          type: "court_booking",
-          recordId: booking.id,
-          title: `Locação de Quadra — ${booking.client_name}`,
-          description: `Horário: ${booking.booking_date.split("-").reverse().join("/")} · ${formatTimeShort(booking.start_time)} às ${formatTimeShort(booking.end_time)}`,
-          amountCents: booking.price_cents,
-          customerName: booking.client_name,
-        });
-        checkoutUrl = res.url;
-        const updated = await updateCourtBooking(booking.id, {
-          stripe_checkout_url: checkoutUrl,
-        });
-        if (updated) setSelectedBooking(updated);
-        await loadAll();
-      }
-
-      if (checkoutUrl) {
-        const waPhone = formatPhoneWhatsApp(booking.client_phone);
-        const msg = encodeURIComponent(
-          `Olá ${booking.client_name}! Sua reserva da quadra para ${booking.booking_date.split("-").reverse().join("/")} (${formatTimeShort(booking.start_time)} às ${formatTimeShort(booking.end_time)}) está pré-agendada no valor de ${formatCurrencyBRL(booking.price_cents)}.\n\nGaranta sua vaga pagando pelo link Stripe:\n${checkoutUrl}`
-        );
-        window.open(`https://wa.me/${waPhone}?text=${msg}`, "_blank");
-      }
-    } finally {
-      setGeneratingStripeId(null);
-    }
+  const handleBookingPixWhatsApp = (booking: CourtBooking) => {
+    const waPhone = formatPhoneWhatsApp(booking.client_phone);
+    const formattedDate = booking.booking_date.split("-").reverse().join("/");
+    const msg = encodeURIComponent(
+      `Olá ${booking.client_name}! Sua reserva da quadra na *ArenaGL* para *${formattedDate}* (${formatTimeShort(booking.start_time)} às ${formatTimeShort(booking.end_time)}) está agendada.\n\n💰 Valor: *${formatCurrencyBRL(booking.price_cents)}*\n🔑 Chave PIX: *${ARENA_PIX_CONFIG.pixKey}*\n🏦 Favorecido: ${ARENA_PIX_CONFIG.beneficiary}\n\nEnvie o comprovante por aqui para confirmarmos a conciliação. Bom jogo! ⚽`
+    );
+    window.open(`https://wa.me/${waPhone}?text=${msg}`, "_blank");
   };
 
   const handleUpdateBookingStatus = async (
@@ -414,8 +372,8 @@ export default function CourtSchedulePage() {
         </div>
       </div>
 
-      {/* Legenda dos Slots com cores semânticas */}
-      <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs flex flex-wrap items-center justify-between gap-3 text-xs">
+      {/* Legenda dos Slots com cores semânticas e acabamento Liquid Glass */}
+      <div className="liquid-glass rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-5">
           <span className="inline-flex items-center gap-2 font-semibold text-indigo-800">
             <span className="h-3.5 w-3.5 rounded border border-indigo-300 court-locked-stripe" />
@@ -423,11 +381,11 @@ export default function CourtSchedulePage() {
           </span>
           <span className="inline-flex items-center gap-2 font-semibold text-emerald-800">
             <span className="h-3.5 w-3.5 rounded bg-emerald-100 border border-emerald-300" />
-            Aluguel Confirmado (Pago)
+            Aluguel Confirmado (Conciliado)
           </span>
           <span className="inline-flex items-center gap-2 font-semibold text-amber-800">
             <span className="h-3.5 w-3.5 rounded bg-amber-100 border border-amber-300" />
-            Aluguel Pendente (Aguardando Stripe)
+            Aluguel Pendente (Aguardando PIX)
           </span>
           <span className="inline-flex items-center gap-2 font-medium text-slate-500">
             <span className="h-3.5 w-3.5 rounded border border-dashed border-slate-300 bg-slate-50" />
@@ -442,7 +400,7 @@ export default function CourtSchedulePage() {
           Carregando grade da quadra...
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+        <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
@@ -761,11 +719,11 @@ export default function CourtSchedulePage() {
               <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={generateStripeOnCreate}
-                  onChange={(e) => setGenerateStripeOnCreate(e.target.checked)}
+                  checked={markPaidOnCreate}
+                  onChange={(e) => setMarkPaidOnCreate(e.target.checked)}
                   className="h-4 w-4 accent-emerald-600"
                 />
-                <span>Gerar link de pagamento Stripe automaticamente</span>
+                <span>Já recebi o comprovante PIX / pagamento no ato (Conciliar)</span>
               </label>
 
               <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
@@ -789,13 +747,13 @@ export default function CourtSchedulePage() {
         </div>
       )}
 
-      {/* Modal Detalhes Reserva */}
+      {/* Modal Detalhes Reserva em Liquid Glass */}
       {selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl liquid-glass p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
               <div>
-                <span className="font-mono text-xs font-bold uppercase text-emerald-600">
+                <span className="font-mono text-xs font-bold uppercase text-emerald-700">
                   Reserva #{selectedBooking.id.slice(0, 6)}
                 </span>
                 <h3 className="font-[family-name:var(--font-montserrat)] text-lg font-bold text-slate-900">
@@ -811,7 +769,7 @@ export default function CourtSchedulePage() {
               </button>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2 text-xs">
+            <div className="rounded-xl border border-slate-200/90 bg-white/80 p-4 space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-500">Data e Horário:</span>
                 <span className="font-mono font-semibold text-slate-900">
@@ -847,21 +805,16 @@ export default function CourtSchedulePage() {
 
             <button
               type="button"
-              disabled={generatingStripeId === selectedBooking.id}
-              onClick={() => handleBookingStripeWhatsApp(selectedBooking)}
-              className="btn-primary w-full !text-xs !py-2.5 shadow-2xs"
+              onClick={() => handleBookingPixWhatsApp(selectedBooking)}
+              className="btn-primary w-full !text-xs !py-2.5 shadow-sm"
             >
               <MessageCircle size={15} />
-              <span>
-                {generatingStripeId === selectedBooking.id
-                  ? "Gerando Link..."
-                  : "Gerar Link Stripe & Abrir WhatsApp"}
-              </span>
+              <span>Enviar Chave PIX & Cobrar no WhatsApp</span>
             </button>
 
-            <div className="border-t border-slate-100 pt-3">
+            <div className="border-t border-slate-200/80 pt-3">
               <span className="mb-2 block text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono">
-                Status do Aluguel:
+                Conciliação Bancária da Reserva:
               </span>
               <div className="grid grid-cols-3 gap-2">
                 <button
@@ -869,20 +822,20 @@ export default function CourtSchedulePage() {
                   onClick={() =>
                     handleUpdateBookingStatus(selectedBooking.id, "paid")
                   }
-                  className={`rounded-lg border py-2 text-xs font-bold cursor-pointer transition ${
+                  className={`rounded-xl border py-2 text-xs font-bold cursor-pointer transition ${
                     selectedBooking.payment_status === "paid"
                       ? "border-emerald-600 bg-emerald-100 text-emerald-800"
                       : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                   }`}
                 >
-                  Pago
+                  ✓ Conciliado
                 </button>
                 <button
                   type="button"
                   onClick={() =>
                     handleUpdateBookingStatus(selectedBooking.id, "pending")
                   }
-                  className={`rounded-lg border py-2 text-xs font-bold cursor-pointer transition ${
+                  className={`rounded-xl border py-2 text-xs font-bold cursor-pointer transition ${
                     selectedBooking.payment_status === "pending"
                       ? "border-amber-500 bg-amber-100 text-amber-800"
                       : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
@@ -895,7 +848,7 @@ export default function CourtSchedulePage() {
                   onClick={() =>
                     handleUpdateBookingStatus(selectedBooking.id, "cancelled")
                   }
-                  className="rounded-lg border border-slate-300 bg-white py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 cursor-pointer transition"
+                  className="rounded-xl border border-slate-300 bg-white py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 cursor-pointer transition"
                 >
                   Cancelar
                 </button>

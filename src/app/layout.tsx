@@ -15,17 +15,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "StatPitch — Gestão de Escolinha de Futebol & Locação de Quadras",
+  title: "ArenaGL — Gestão de Escolinha de Futebol & Locação de Quadras",
   description:
-    "Plataforma SportTech para gestão de escolinhas de futebol e locação de quadras sem conflitos, com matrícula digital e pagamentos Stripe.",
+    "Plataforma SportTech para gestão integrada de escolinhas de futebol, locação de quadras sem conflitos, matrícula digital e conciliação bancária manual via PIX.",
   keywords: [
     "escolinha de futebol",
     "aluguel de quadra",
     "gestão esportiva",
     "mensalidades",
-    "stripe",
+    "conciliação bancária",
+    "pix",
     "futebol society",
-    "sporttech",
+    "arenagl",
   ],
 };
 
@@ -39,7 +40,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${inter.variable} ${montserrat.variable} antialiased`}
     >
-      <body className="min-h-screen bg-slate-50 text-slate-900 selection:bg-emerald-500 selection:text-white">
+      <body className="min-h-screen text-slate-900 selection:bg-emerald-500 selection:text-white">
         {children}
       </body>
     </html>

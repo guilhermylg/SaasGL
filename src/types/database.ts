@@ -1,5 +1,5 @@
 // ============================================================
-// StatPitch Academy & Court — Database Types (Supabase)
+// ArenaGL — Gestão de Escolinha & Quadras — Database Types (Supabase)
 // ============================================================
 
 export type PlayerPosition =
@@ -58,6 +58,12 @@ export const DAYS_OF_WEEK: DayOfWeek[] = [
   "Domingo",
 ];
 
+export const ARENA_PIX_CONFIG = {
+  pixKey: "financeiro@arenagl.com.br",
+  bankName: "Banco Itaú — Ag. 0412 / CC 99821-4",
+  beneficiary: "ArenaGL Centro Esportivo LTDA",
+};
+
 // 1. classes (Turmas da Escolinha)
 export interface SchoolClass {
   id: string;
@@ -87,7 +93,6 @@ export interface Student {
   guardian_cpf: string;
   billing_day: BillingDay;
   class_id: string | null;
-  stripe_customer_id: string | null;
   status: StudentStatus;
   created_at: string;
   // Relação opcional carregada via join ou lookup
@@ -103,8 +108,7 @@ export interface StudentPayment {
   due_date: string;        // YYYY-MM-DD
   amount_cents: number;
   status: StudentPaymentStatus;
-  stripe_checkout_url: string | null;
-  stripe_payment_intent_id: string | null;
+  payment_method?: string | null; // PIX, Transferência, Dinheiro, Cartão
   paid_at: string | null;
   created_at: string;
   student?: Student;
@@ -121,8 +125,6 @@ export interface CourtBooking {
   booking_type: BookingType;
   price_cents: number;
   payment_status: CourtPaymentStatus;
-  stripe_checkout_url: string | null;
-  stripe_payment_intent_id?: string | null;
   paid_at?: string | null;
   notes: string;
   created_at: string;

@@ -387,14 +387,14 @@ export default function StudentsDashboardPage() {
             return (
               <div
                 key={student.id}
-                className="rounded-xl border border-slate-200 bg-white shadow-xs hover:shadow-md transition-all flex flex-col justify-between overflow-hidden"
+                className="card flex flex-col justify-between overflow-hidden"
               >
                 {/* Cabeçalho do Cromo */}
                 <div className="p-5 space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       {/* Avatar Cromo Esportivo */}
-                      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white font-[family-name:var(--font-montserrat)] font-bold text-sm border-2 border-emerald-500 shadow-xs">
+                      <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 text-white font-[family-name:var(--font-montserrat)] font-black text-sm border-2 border-emerald-500 shadow-sm">
                         <span>{initials}</span>
                       </div>
 
@@ -420,7 +420,7 @@ export default function StudentsDashboardPage() {
                       {finStatus === "paid" && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
                           <CheckCircle2 size={12} />
-                          Pago
+                          Conciliado
                         </span>
                       )}
                       {finStatus === "pending" && (

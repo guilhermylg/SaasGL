@@ -7,7 +7,7 @@ type LogoProps = {
   inverted?: boolean;
 };
 
-/** Símbolo SportTech: gramado estilizado com círculo central em esmeralda */
+/** Símbolo SportTech Liquid Glass: gramado estilizado com brilho especular */
 export function LogoMark({ size = 32 }: { size?: number }) {
   return (
     <svg
@@ -16,15 +16,26 @@ export function LogoMark({ size = 32 }: { size?: number }) {
       viewBox="0 0 32 32"
       fill="none"
       aria-hidden="true"
-      className="shrink-0"
+      className="shrink-0 drop-shadow-sm"
     >
-      <rect width="32" height="32" rx="8" fill="#059669" />
+      <defs>
+        <linearGradient id="arenaEmerald" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#10B981" />
+          <stop offset="100%" stopColor="#047857" />
+        </linearGradient>
+        <linearGradient id="glassShine" x1="0" y1="0" x2="0" y2="18" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <rect width="32" height="32" rx="9" fill="url(#arenaEmerald)" />
+      <rect x="1" y="1" width="30" height="15" rx="8" fill="url(#glassShine)" />
       <rect
         x="6"
         y="8.5"
         width="20"
         height="15"
-        rx="2"
+        rx="2.5"
         stroke="#FFFFFF"
         strokeWidth="1.75"
       />
@@ -42,11 +53,11 @@ export function Logo({ href = "/", subtitle, size = "md", inverted = false }: Lo
       </span>
       <span className="leading-tight">
         <span
-          className={`block font-[family-name:var(--font-montserrat)] font-extrabold tracking-tight ${
+          className={`block font-[family-name:var(--font-montserrat)] font-black tracking-tight ${
             size === "sm" ? "text-base" : "text-lg"
           } ${inverted ? "text-white" : "text-slate-900"}`}
         >
-          Stat<span className="text-emerald-500">Pitch</span>
+          Arena<span className="text-emerald-500">GL</span>
         </span>
         {subtitle && (
           <span

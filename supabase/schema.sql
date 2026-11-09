@@ -1,6 +1,6 @@
 -- ============================================================
--- StatPitch Academy & Court SaaS — Schema Completo para Supabase
--- Gestão de Escolinha de Futebol e Locação de Quadra + Stripe
+-- ArenaGL — Gestão de Escolinha de Futebol e Locação de Quadra
+-- Schema Completo para Supabase (Conciliação Bancária Manual)
 -- ============================================================
 -- Execute este script no SQL Editor do Supabase (Dashboard > SQL Editor)
 -- ============================================================
@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS public.students (
   guardian_cpf       TEXT NOT NULL,
   billing_day        INT NOT NULL DEFAULT 10 CHECK (billing_day IN (5, 10, 15, 20)),
   class_id           UUID REFERENCES public.classes(id) ON DELETE SET NULL,
-  stripe_customer_id TEXT,
   status             TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('active', 'pending', 'inactive')),
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -64,7 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_students_status   ON public.students(status);
 CREATE INDEX IF NOT EXISTS idx_students_position ON public.students(position);
 
 -- ============================================================
--- 3. Tabela: student_payments (Calendário de Pagamento dos Alunos)
+-- 3. Tabela: student_payments (Calendário & Conciliação de Mensalidades)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.student_payments (
   id                       UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -74,15 +73,14 @@ CREATE TABLE IF NOT EXISTS public.student_payments (
   due_date                 DATE NOT NULL,
   amount_cents             INT NOT NULL CHECK (amount_cents >= 0),
   status                   TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('paid', 'pending', 'overdue')),
-  stripe_checkout_url      TEXT,
-  stripe_payment_intent_id TEXT,
+  payment_method           TEXT DEFAULT 'PIX',
   paid_at                  TIMESTAMPTZ,
   created_at               TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   UNIQUE(student_id, reference_month, reference_year)
 );
 
-COMMENT ON TABLE public.student_payments IS 'Mensalidades e cobranças dos alunos da escolinha sincronizadas com a Stripe';
+COMMENT ON TABLE public.student_payments IS 'Mensalidades e conciliação bancária manual dos alunos da escolinha';
 
 CREATE INDEX IF NOT EXISTS idx_student_payments_student ON public.student_payments(student_id);
 CREATE INDEX IF NOT EXISTS idx_student_payments_period  ON public.student_payments(reference_year, reference_month);
@@ -102,8 +100,6 @@ CREATE TABLE IF NOT EXISTS public.court_bookings (
   booking_type        TEXT NOT NULL DEFAULT 'avulso' CHECK (booking_type IN ('avulso', 'mensalista', 'aula_escolinha')),
   price_cents         INT NOT NULL DEFAULT 0 CHECK (price_cents >= 0),
   payment_status      TEXT NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('paid', 'pending', 'cancelled')),
-  stripe_checkout_url TEXT,
-  stripe_payment_intent_id TEXT,
   paid_at             TIMESTAMPTZ,
   notes               TEXT DEFAULT '',
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now()

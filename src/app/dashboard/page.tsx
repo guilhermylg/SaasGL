@@ -244,19 +244,19 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 4 KPI Cards */}
+      {/* 4 KPI Cards em Liquid Glass */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpiCards.map((stat) => (
           <div
             key={stat.label}
-            className={`rounded-xl border ${stat.border} bg-white p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between`}
+            className="card p-5 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-500">
                 {stat.label}
               </span>
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-lg ${stat.bg} ${stat.color}`}
+                className={`flex h-9 w-9 items-center justify-center rounded-xl ${stat.bg} ${stat.color} shadow-2xs`}
               >
                 <stat.icon size={18} />
               </div>
@@ -276,16 +276,16 @@ export default function DashboardPage() {
       {/* Duas Colunas: Vencimentos/Atrasos & Quadra de Hoje */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Coluna 1: Próximos Vencimentos & Alunos em Atraso */}
-        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden flex flex-col justify-between">
+        <div className="card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-slate-200/80 bg-white/60 px-5 py-4">
               <div>
                 <h2 className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900 flex items-center gap-2">
                   <AlertTriangle size={18} className="text-amber-600" />
                   Próximos Vencimentos & Atrasos
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Cobranças pendentes ou vencidas neste mês
+                  Cobranças pendentes de conciliação PIX neste mês
                 </p>
               </div>
               <Link
@@ -366,9 +366,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Coluna 2: Agenda da Quadra de Hoje */}
-        <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden flex flex-col justify-between">
+        <div className="card overflow-hidden flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-slate-200/80 bg-white/60 px-5 py-4">
               <div>
                 <h2 className="font-[family-name:var(--font-montserrat)] text-base font-bold text-slate-900 flex items-center gap-2">
                   <CalendarClock size={18} className="text-emerald-600" />
