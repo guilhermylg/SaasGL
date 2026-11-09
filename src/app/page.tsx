@@ -220,25 +220,25 @@ export default function Home() {
               title: "Alunos & Cromos",
               desc: "Ficha do atleta, categoria Sub, posição de jogo, ficha médica e botão direto no WhatsApp do pai.",
               icon: Users,
-              href: "/dashboard/students",
+              href: "/dashboard/alunos",
             },
             {
               title: "Turmas & Categorias",
               desc: "Crie turmas Sub-7 ao Sub-17 com faixas etárias, professor, dias de treino e valor da mensalidade.",
               icon: Trophy,
-              href: "/dashboard/classes",
+              href: "/dashboard/turmas",
             },
             {
               title: "Calendário Financeiro",
               desc: "Controle por vencimento (dias 5, 10, 15, 20) ou Matriz Anual com links Stripe e baixa automática.",
               icon: CreditCard,
-              href: "/dashboard/payments",
+              href: "/dashboard/financeiro",
             },
             {
               title: "Agenda Híbrida 07h–23h",
               desc: "Grade unificada: turmas fixas bloqueiam a quadra, locações avulsas e botão rápido de reserva.",
               icon: CalendarClock,
-              href: "/dashboard/court",
+              href: "/dashboard/quadra",
             },
           ].map((item) => (
             <Link

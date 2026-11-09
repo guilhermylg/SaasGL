@@ -11,6 +11,7 @@ import {
   StudentPayment,
   CourtBooking,
   StudentPaymentStatus,
+  DayOfWeek,
 } from "@/types/database";
 
 const STORAGE_KEYS = {
@@ -376,16 +377,102 @@ export async function fetchCourtBookings(): Promise<CourtBooking[]> {
   );
 }
 
+export function timeToMinutes(timeStr: string): number {
+  if (!timeStr) return 0;
+  const [h, m] = timeStr.split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+export function doTimesOverlap(
+  startA: string,
+  endA: string,
+  startB: string,
+  endB: string
+): boolean {
+  return (
+    timeToMinutes(startA) < timeToMinutes(endB) &&
+    timeToMinutes(endA) > timeToMinutes(startB)
+  );
+}
+
+const JS_DAY_TO_PT_WEEK: Record<number, DayOfWeek> = {
+  0: "Domingo",
+  1: "Segunda",
+  2: "Terça",
+  3: "Quarta",
+  4: "Quinta",
+  5: "Sexta",
+  6: "Sábado",
+};
+
+export async function validateCourtAvailability(
+  bookingDate: string,
+  startTime: string,
+  endTime: string,
+  ignoreBookingId?: string
+): Promise<{ available: boolean; conflictMessage?: string }> {
+  const [y, m, d] = bookingDate.split("-").map(Number);
+  const dayName = JS_DAY_TO_PT_WEEK[new Date(y, m - 1, d).getDay()];
+
+  // 1. Checa conflito com turmas ativas da escolinha no dia da semana
+  const classes = await fetchClasses();
+  for (const cls of classes) {
+    if (cls.days_of_week.includes(dayName)) {
+      if (doTimesOverlap(cls.start_time, cls.end_time, startTime, endTime)) {
+        return {
+          available: false,
+          conflictMessage: `Horário reservado para treino da Escolinha: Turma "${cls.name}" (${cls.start_time.slice(0, 5)} às ${cls.end_time.slice(0, 5)}).`,
+        };
+      }
+    }
+  }
+
+  // 2. Checa conflito com outros agendamentos existentes da quadra na mesma data
+  const bookings = await fetchCourtBookings();
+  for (const b of bookings) {
+    if (b.id === ignoreBookingId) continue;
+    if (b.booking_date !== bookingDate) continue;
+    if (b.payment_status === "cancelled") continue;
+
+    if (doTimesOverlap(b.start_time, b.end_time, startTime, endTime)) {
+      return {
+        available: false,
+        conflictMessage: `Horário indisponível: Já existe locação agendada para "${b.client_name}" (${b.start_time.slice(0, 5)} às ${b.end_time.slice(0, 5)}).`,
+      };
+    }
+  }
+
+  return { available: true };
+}
+
 export async function createCourtBooking(
   payload: Omit<CourtBooking, "id" | "created_at">
 ): Promise<CourtBooking> {
+  // Trava anti-conflito (Double Booking prevention - verificação tanto para Supabase quanto local)
+  const validation = await validateCourtAvailability(
+    payload.booking_date,
+    payload.start_time,
+    payload.end_time
+  );
+
+  if (!validation.available) {
+    throw new Error(
+      validation.conflictMessage ||
+        "Não foi possível criar a reserva: horário indisponível devido a conflito de agenda."
+    );
+  }
+
   if (isSupabaseConfigured) {
     const { data, error } = await supabase
       .from("court_bookings")
       .insert([payload])
       .select("*")
       .single();
-    if (!error && data) {
+    if (error) {
+      console.error("Erro ao inserir court_booking no Supabase:", error);
+      throw new Error(`Erro ao salvar reserva no Supabase: ${error.message}`);
+    }
+    if (data) {
       return data as CourtBooking;
     }
   }

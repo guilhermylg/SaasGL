@@ -228,14 +228,14 @@ export default function DashboardPage() {
 
         <div className="flex flex-wrap items-center gap-2.5">
           <Link
-            href="/dashboard/court"
+            href="/dashboard/quadra"
             className="btn-secondary !text-xs sm:!text-sm"
           >
             <CalendarClock size={16} />
             <span>Reservar Horário</span>
           </Link>
           <Link
-            href="/dashboard/students"
+            href="/dashboard/alunos"
             className="btn-primary !text-xs sm:!text-sm"
           >
             <Plus size={16} />
@@ -289,7 +289,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               <Link
-                href="/dashboard/payments"
+                href="/dashboard/financeiro"
                 className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
               >
                 <span>Ver Tudo</span>
@@ -379,7 +379,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               <Link
-                href="/dashboard/court"
+                href="/dashboard/quadra"
                 className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
               >
                 <span>Grade Completa</span>

@@ -19,10 +19,10 @@ import { isSupabaseConfigured } from "@/lib/supabase";
 
 export const navItems = [
   { href: "/dashboard", label: "Visão Geral", icon: LayoutDashboard },
-  { href: "/dashboard/students", label: "Alunos", icon: Users },
-  { href: "/dashboard/classes", label: "Turmas & Categorias", icon: Trophy },
-  { href: "/dashboard/payments", label: "Calendário Financeiro", icon: CreditCard },
-  { href: "/dashboard/court", label: "Agenda da Quadra", icon: CalendarClock },
+  { href: "/dashboard/alunos", label: "Alunos", icon: Users },
+  { href: "/dashboard/turmas", label: "Turmas & Categorias", icon: Trophy },
+  { href: "/dashboard/financeiro", label: "Calendário Financeiro", icon: CreditCard },
+  { href: "/dashboard/quadra", label: "Agenda da Quadra", icon: CalendarClock },
 ];
 
 export function isNavActive(pathname: string, href: string) {

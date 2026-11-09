@@ -17,6 +17,7 @@ import {
   Sparkles,
   Phone,
   ArrowLeft,
+  MessageCircle,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import {
@@ -277,7 +278,7 @@ export default function MatriculaPublicPage() {
               </div>
             </div>
 
-            {/* Botões Stripe */}
+            {/* Botões Stripe & Ação Imediata */}
             <div className="space-y-3">
               <a
                 href={enrollmentResult.checkoutUrl}
@@ -307,6 +308,53 @@ export default function MatriculaPublicPage() {
                   </>
                 )}
               </button>
+            </div>
+
+            {/* Guia de Próximos Passos */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-3">
+              <h3 className="font-[family-name:var(--font-montserrat)] text-xs font-bold uppercase tracking-wider text-slate-700">
+                Próximos Passos para o 1º Treino:
+              </h3>
+              <ul className="space-y-2 text-xs text-slate-600">
+                <li className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                    1
+                  </span>
+                  <span>
+                    Conclua o pagamento da 1ª mensalidade via link seguro Stripe (Cartão ou PIX).
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                    2
+                  </span>
+                  <span>
+                    Apresente o atestado médico de aptidão física na secretaria ou envie pelo WhatsApp.
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                    3
+                  </span>
+                  <span>
+                    Compareça 15 minutos antes do horário de início com chuteira de society e caneleiras.
+                  </span>
+                </li>
+              </ul>
+
+              <div className="pt-2">
+                <a
+                  href={`https://wa.me/5511999999999?text=${encodeURIComponent(
+                    `Olá, acabei de realizar a matrícula de ${enrollmentResult.studentName} na turma ${enrollmentResult.className} e gostaria de confirmar o kit de uniforme!`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 py-2.5 px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition"
+                >
+                  <MessageCircle size={15} className="text-emerald-600" />
+                  <span>Falar com a Coordenação no WhatsApp</span>
+                </a>
+              </div>
             </div>
 
             <div className="pt-2 text-center">

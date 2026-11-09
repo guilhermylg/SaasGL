@@ -9,10 +9,10 @@ import { navItems, isNavActive } from "@/components/sidebar";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Visão Geral",
-  "/dashboard/students": "Gestão de Alunos",
-  "/dashboard/classes": "Turmas & Categorias",
-  "/dashboard/payments": "Calendário Financeiro",
-  "/dashboard/court": "Agenda da Quadra",
+  "/dashboard/alunos": "Gestão de Alunos",
+  "/dashboard/turmas": "Turmas & Categorias",
+  "/dashboard/financeiro": "Calendário Financeiro",
+  "/dashboard/quadra": "Agenda da Quadra",
 };
 
 export function Header() {

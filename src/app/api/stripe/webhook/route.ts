@@ -40,13 +40,21 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    if (event.type === "checkout.session.completed") {
+    if (
+      event.type === "checkout.session.completed" ||
+      event.type === "checkout.session.async_payment_succeeded"
+    ) {
       const session = event.data.object as Stripe.Checkout.Session;
-      const type = session.metadata?.type as
+      const type = (session.metadata?.type ||
+        (session.metadata?.booking_id ? "court_booking" : "") ||
+        (session.metadata?.payment_id ? "student_payment" : "student_payment")) as
         | "student_payment"
-        | "court_booking"
-        | undefined;
-      const recordId = session.metadata?.recordId;
+        | "court_booking";
+      const recordId =
+        session.metadata?.recordId ||
+        session.metadata?.payment_id ||
+        session.metadata?.booking_id ||
+        session.client_reference_id;
       const studentId = session.metadata?.studentId;
       const paymentIntentId =
         typeof session.payment_intent === "string"
@@ -62,7 +70,7 @@ export async function POST(request: NextRequest) {
         const nowIso = new Date().toISOString();
 
         if (type === "student_payment") {
-          await supabaseAdmin
+          const { error: paymentError } = await supabaseAdmin
             .from("student_payments")
             .update({
               status: "paid",
@@ -71,6 +79,10 @@ export async function POST(request: NextRequest) {
             })
             .eq("id", recordId);
 
+          if (paymentError) {
+            console.error("Erro ao atualizar student_payments:", paymentError);
+          }
+
           if (studentId) {
             const studentUpdate: Record<string, unknown> = {
               status: "active",
@@ -78,18 +90,28 @@ export async function POST(request: NextRequest) {
             if (customerId) {
               studentUpdate.stripe_customer_id = customerId;
             }
-            await supabaseAdmin
+            const { error: studentError } = await supabaseAdmin
               .from("students")
               .update(studentUpdate)
               .eq("id", studentId);
+
+            if (studentError) {
+              console.error("Erro ao ativar student:", studentError);
+            }
           }
         } else if (type === "court_booking") {
-          await supabaseAdmin
+          const { error: bookingError } = await supabaseAdmin
             .from("court_bookings")
             .update({
               payment_status: "paid",
+              paid_at: nowIso,
+              stripe_payment_intent_id: paymentIntentId,
             })
             .eq("id", recordId);
+
+          if (bookingError) {
+            console.error("Erro ao atualizar court_bookings:", bookingError);
+          }
         }
       }
     }

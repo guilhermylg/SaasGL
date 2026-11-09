@@ -122,6 +122,8 @@ export interface CourtBooking {
   price_cents: number;
   payment_status: CourtPaymentStatus;
   stripe_checkout_url: string | null;
+  stripe_payment_intent_id?: string | null;
+  paid_at?: string | null;
   notes: string;
   created_at: string;
 }

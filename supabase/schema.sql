@@ -103,6 +103,8 @@ CREATE TABLE IF NOT EXISTS public.court_bookings (
   price_cents         INT NOT NULL DEFAULT 0 CHECK (price_cents >= 0),
   payment_status      TEXT NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('paid', 'pending', 'cancelled')),
   stripe_checkout_url TEXT,
+  stripe_payment_intent_id TEXT,
+  paid_at             TIMESTAMPTZ,
   notes               TEXT DEFAULT '',
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );

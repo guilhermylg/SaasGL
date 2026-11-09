@@ -52,12 +52,12 @@ export async function POST(request: NextRequest) {
 
       const successPath =
         type === "student_payment"
-          ? `/dashboard/payments?checkout=success&id=${recordId}`
-          : `/dashboard/court?checkout=success&id=${recordId}`;
+          ? `/dashboard/financeiro?checkout=success&id=${recordId}`
+          : `/dashboard/quadra?checkout=success&id=${recordId}`;
       const cancelPath =
         type === "student_payment"
-          ? `/dashboard/payments?checkout=cancelled&id=${recordId}`
-          : `/dashboard/court?checkout=cancelled&id=${recordId}`;
+          ? `/dashboard/financeiro?checkout=cancelled&id=${recordId}`
+          : `/dashboard/quadra?checkout=cancelled&id=${recordId}`;
 
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
